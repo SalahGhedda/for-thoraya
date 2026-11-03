@@ -4,7 +4,7 @@ A hand-drawn bouquet that blooms petal by petal, followed by the animated dedica
 
 **Website:** https://salahghedda.github.io/for-thoraya/
 
-The illustration contains roses, peonies, a lily, tulips, hydrangeas, daisies, lavender, and foliage, gathered inside layered ivory and rose-colored wrapping with gold edging and a satin bow. The only visible text is the dedication, which appears after the drawing and color washes finish. Small icon buttons provide pause and replay. The page adapts to phone screens and respects reduced-motion preferences.
+The illustration contains roses, peonies, a lily, tulips, hydrangeas, daisies, lavender, and foliage, gathered inside layered ivory and rose-colored wrapping with gold edging and a satin bow. The animation plays automatically, followed by the dedication, which is the only visible text. The page adapts to phone screens and respects reduced-motion preferences.
 
 ## Run locally
 

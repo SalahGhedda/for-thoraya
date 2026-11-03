@@ -2,14 +2,7 @@
   'use strict';
   const NS = 'http://www.w3.org/2000/svg';
   const layers = Object.fromEntries(['paper-back','stems','foliage','flowers','paper-front','ribbon'].map(id => [id, document.getElementById(id)]));
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  const pauseButton = document.getElementById('pause');
   let drawingEnd = 0;
-  let elapsed = 0;
-  let previous = null;
-  let frame;
-  let paused = false;
-  let finished = false;
 
   function group(parent,x=0,y=0,angle=0,scale=1) {
     const g=document.createElementNS(NS,'g');
@@ -214,44 +207,5 @@
   const toDelay=fromDelay+1.2;
   document.documentElement.style.setProperty('--from-delay',`${fromDelay}s`);
   document.documentElement.style.setProperty('--to-delay',`${toDelay}s`);
-  const totalTime=(toDelay+1.75)*1000;
-
-  function complete() {
-    finished=true;
-    document.body.classList.add('finished');
-    frame=null;
-  }
-  function tick(now) {
-    if(previous!==null)elapsed+=now-previous;
-    previous=now;
-    if(elapsed>=totalTime){complete();return;}
-    frame=requestAnimationFrame(tick);
-  }
-  function reset() {
-    cancelAnimationFrame(frame);
-    elapsed=0;previous=null;paused=false;finished=false;
-    document.body.classList.remove('paused','finished');
-    pauseButton.setAttribute('aria-label','Pause animation');
-    pauseButton.title='Pause';
-    // Collect the timeline once so every stroke restarts in the same frame.
-    const animations=document.querySelector('.gift').getAnimations({subtree:true});
-    animations.forEach(animation=>{animation.currentTime=0;animation.play();});
-    if(motion.matches)complete();
-    else frame=requestAnimationFrame(tick);
-  }
-  pauseButton.addEventListener('click',()=>{
-    if(finished)return;
-    paused=!paused;
-    document.body.classList.toggle('paused',paused);
-    pauseButton.setAttribute('aria-label',paused?'Resume animation':'Pause animation');
-    pauseButton.title=paused?'Resume':'Pause';
-    previous=null;
-    if(paused)cancelAnimationFrame(frame);
-    else frame=requestAnimationFrame(tick);
-  });
-  document.getElementById('replay').addEventListener('click',reset);
-  motion.addEventListener('change',reset);
   document.body.classList.remove('preparing');
-  if(motion.matches)complete();
-  else frame=requestAnimationFrame(tick);
 })();
