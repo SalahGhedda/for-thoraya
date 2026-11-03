@@ -3,72 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f7f3eb">
-  <meta name="description" content="A little bouquet, a lot of love. Watch a garden of flowers come to life, petal by petal. From Salah, to Thoraya.">
-  <title>For Thoraya — a little bouquet</title>
+  <meta name="theme-color" content="#faf3ef">
+  <meta name="description" content="From Salah, to Thoraya.">
+  <title>For Thoraya</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css">
   <script src="./bouquet.js" defer></script>
 </head>
-<body>
-  <div class="paper" aria-hidden="true"></div>
-  <header class="masthead">
-    <a class="wordmark" href="./" aria-label="A little bloom, home">
-      <svg viewBox="0 0 36 42" aria-hidden="true"><path d="M18 38V19M18 30Q5 30 6 20Q16 20 18 30M18 25Q29 25 29 16Q20 17 18 25"/><path class="logo-petals" d="M18 18C8 22 4 10 12 9C8 0 20-1 21 7C30 1 35 13 26 15C30 24 20 27 18 18Z"/><circle cx="19" cy="13" r="3"/></svg>
-      <span>a little bloom<span class="wordmark-dot">.</span></span>
-    </a>
-    <span class="masthead-note">SOMETHING LOVELY, JUST FOR YOU</span>
-    <span class="monogram" aria-label="Salah and Thoraya">S <span>♡</span> T</span>
-  </header>
-
-  <main>
-    <section class="gift" aria-labelledby="page-title">
-      <div class="intro">
-        <p class="eyebrow">A SMALL GESTURE. A WHOLE LOT OF HEART.</p>
-        <h1 id="page-title">Some feelings <em>bloom.</em></h1>
-        <p class="intro-note">For the things that words can’t quite say.</p>
-      </div>
-
-      <div class="drawing-stage" id="drawing-stage">
-        <div class="side-note note-left" aria-hidden="true"><span>a little joy</span><svg viewBox="0 0 95 60"><path d="M8 8Q22 48 81 42M72 34L83 42L72 49"/></svg></div>
-        <svg class="bouquet" id="bouquet" viewBox="90 60 520 580" role="img" aria-labelledby="bouquet-title bouquet-desc">
-          <title id="bouquet-title">A bouquet for Thoraya</title>
-          <desc id="bouquet-desc">Hand-drawn coral roses, a pink peony, an apricot poppy, cream daisies, a pink cosmos, lavender, and little blue flowers, with green foliage and a rose-colored ribbon.</desc>
-          <defs>
-            <radialGradient id="rose-wash" cx="38%" cy="35%" r="72%"><stop stop-color="#f7c1b2"/><stop offset=".65" stop-color="#e99887"/><stop offset="1" stop-color="#d77b71"/></radialGradient>
-            <radialGradient id="peony-wash" cx="36%" cy="28%" r="80%"><stop stop-color="#f4c2cb"/><stop offset=".65" stop-color="#de97ac"/><stop offset="1" stop-color="#cb7895"/></radialGradient>
-            <radialGradient id="poppy-wash" cx="35%" cy="27%" r="80%"><stop stop-color="#f9dbab"/><stop offset=".7" stop-color="#edb77b"/><stop offset="1" stop-color="#d99b65"/></radialGradient>
-            <radialGradient id="cosmos-wash"><stop stop-color="#dd9bab"/><stop offset="1" stop-color="#f2ccd1"/></radialGradient>
-            <linearGradient id="leaf-wash" x2="1" y2="1"><stop stop-color="#adc2a1"/><stop offset="1" stop-color="#6e9077"/></linearGradient>
-            <linearGradient id="eucalyptus-wash" x2=".8" y2="1"><stop stop-color="#bbcbc0"/><stop offset="1" stop-color="#87a79c"/></linearGradient>
-            <linearGradient id="ribbon-wash" x2=".8" y2="1"><stop stop-color="#ddb1a8"/><stop offset="1" stop-color="#be847f"/></linearGradient>
-            <radialGradient id="daisy-wash"><stop stop-color="#f0e3b9"/><stop offset=".35" stop-color="#fff9e9"/><stop offset="1" stop-color="#fffdf5"/></radialGradient>
-          </defs>
-          <g id="stems"></g>
-          <g id="foliage"></g>
-          <g id="flowers"></g>
-          <g id="ribbon"></g>
-          <g id="accents"></g>
-        </svg>
-        <div class="side-note note-right" aria-hidden="true"><span>all for you</span><svg viewBox="0 0 95 60"><path d="M84 8Q67 48 15 42M24 34L13 42L24 49"/></svg></div>
-      </div>
-
-      <div class="dedication" id="dedication">
-        <p class="signature" aria-label="From Salah, to Thoraya"><span class="signature-from" aria-hidden="true">From Salah,</span> <span class="signature-to" aria-hidden="true">to Thoraya</span><svg class="signature-heart" viewBox="0 0 45 42" aria-hidden="true"><path d="M23 35C17 29 4 21 6 12C8 3 18 4 22 13C25 3 37 4 38 13C39 22 28 31 23 35Z"/></svg></p>
-        <p class="dedication-note">EVERY PETAL, A LITTLE THOUGHT OF YOU.</p>
-      </div>
-
-      <div class="playback">
-        <div class="status-line"><span class="status-dot"></span><span id="status" role="status">A little love is taking shape…</span></div>
-        <div class="controls">
-          <button class="replay-button" id="replay" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.1 6.5A6.5 6.5 0 1 1 3.5 11M4 2v5h5"/></svg><span>Watch it bloom again</span></button>
-          <button class="pause-button" id="pause" type="button" aria-label="Pause animation" title="Pause animation"><svg class="pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg></button>
-        </div>
-      </div>
-    </section>
+<body class="preparing">
+  <main class="gift" aria-label="A bouquet for Thoraya">
+    <div class="drawing-stage">
+      <svg id="bouquet" viewBox="20 0 560 780" role="img" aria-labelledby="bouquet-title bouquet-desc">
+        <title id="bouquet-title">A wrapped bouquet for Thoraya</title>
+        <desc id="bouquet-desc">A full bouquet of coral and burgundy roses, blush peonies, an ivory lily, apricot flowers, blue hydrangeas, daisies, and lavender. Layered ivory and rose-colored paper surrounds the flowers, with fine gold edging and a deep rose satin bow.</desc>
+        <defs>
+          <radialGradient id="coral" cx=".34" cy=".22" r=".95"><stop stop-color="#ffe0d0"/><stop offset=".48" stop-color="#ed9992"/><stop offset="1" stop-color="#c85b71"/></radialGradient>
+          <radialGradient id="wine" cx=".3" cy=".18" r=".95"><stop stop-color="#efb4bc"/><stop offset=".45" stop-color="#c86683"/><stop offset="1" stop-color="#8e3458"/></radialGradient>
+          <radialGradient id="pink" cx=".32" cy=".2" r="1"><stop stop-color="#ffe7e5"/><stop offset=".5" stop-color="#eeb8c8"/><stop offset="1" stop-color="#c880a0"/></radialGradient>
+          <radialGradient id="cream" cx=".3" cy=".15" r=".95"><stop stop-color="#fffef6"/><stop offset=".6" stop-color="#f6e6cd"/><stop offset="1" stop-color="#d5b3a3"/></radialGradient>
+          <radialGradient id="apricot" cx=".3" cy=".2" r="1"><stop stop-color="#fff0c9"/><stop offset=".5" stop-color="#f5c58d"/><stop offset="1" stop-color="#d9926f"/></radialGradient>
+          <radialGradient id="lily" cx=".5" cy=".1" r="1"><stop stop-color="#fffcf3"/><stop offset=".55" stop-color="#f8e9df"/><stop offset="1" stop-color="#d99da9"/></radialGradient>
+          <radialGradient id="blue" cx=".35" cy=".2" r="1"><stop stop-color="#e0e9ee"/><stop offset=".6" stop-color="#abc9d7"/><stop offset="1" stop-color="#7c9db9"/></radialGradient>
+          <linearGradient id="leaf" x1="0" y1="0" x2="1" y2=".8"><stop stop-color="#b0bfa0"/><stop offset=".45" stop-color="#789a7b"/><stop offset="1" stop-color="#436c61"/></linearGradient>
+          <linearGradient id="eucalyptus" x2="1" y2="1"><stop stop-color="#c5d4c3"/><stop offset=".5" stop-color="#98b6a6"/><stop offset="1" stop-color="#6e968b"/></linearGradient>
+          <linearGradient id="back-paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffdf7"/><stop offset=".55" stop-color="#f1e1dc"/><stop offset="1" stop-color="#d9b4b3"/></linearGradient>
+          <linearGradient id="rose-paper" x1="0" y1="0" x2="1" y2=".6"><stop stop-color="#eac6c4"/><stop offset=".22" stop-color="#f9dfd9"/><stop offset=".55" stop-color="#d3a4ad"/><stop offset="1" stop-color="#b88398"/></linearGradient>
+          <linearGradient id="ivory-paper" x1="0" y1="0" x2="1" y2=".3"><stop stop-color="#d8bdbb"/><stop offset=".22" stop-color="#f6e9df"/><stop offset=".6" stop-color="#fff9ec"/><stop offset="1" stop-color="#edddce"/></linearGradient>
+          <linearGradient id="fold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffaf0"/><stop offset=".55" stop-color="#f5e2d5"/><stop offset="1" stop-color="#d9b5b4"/></linearGradient>
+          <linearGradient id="satin" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#8e3e5e"/><stop offset=".26" stop-color="#c67d91"/><stop offset=".43" stop-color="#e3a8b0"/><stop offset=".6" stop-color="#b65e7c"/><stop offset="1" stop-color="#8f3758"/></linearGradient>
+          <linearGradient id="satin-tail" x1="0" y1="0" x2="1" y2=".2"><stop stop-color="#a34d6b"/><stop offset=".4" stop-color="#d88e9f"/><stop offset=".6" stop-color="#df9fa9"/><stop offset="1" stop-color="#a04c6c"/></linearGradient>
+        </defs>
+        <g id="paper-back"></g><g id="stems"></g><g id="foliage"></g><g id="flowers"></g><g id="paper-front"></g><g id="ribbon"></g>
+      </svg>
+    </div>
+    <p class="dedication" aria-label="From Salah, to Thoraya"><span class="from" aria-hidden="true">From Salah,</span> <span class="to" aria-hidden="true">to Thoraya</span></p>
+    <div class="controls">
+      <button id="replay" type="button" aria-label="Replay the bouquet animation" title="Replay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 7.5A8 8 0 1 1 4 13M5 3v5h5"/></svg></button>
+      <button id="pause" type="button" aria-label="Pause animation" title="Pause"><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+    </div>
   </main>
-
-  <footer><span>A FEW FLOWERS. A FEELING THAT STAYS.</span><span class="footer-heart" aria-hidden="true">♡</span><span>MADE WITH LOVE, BY SALAH</span></footer>
-  <noscript><p class="noscript-note">Please enable JavaScript to watch your bouquet bloom.</p></noscript>
 </body>
 </html>

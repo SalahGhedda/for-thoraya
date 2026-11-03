@@ -1,275 +1,257 @@
 (() => {
   'use strict';
   const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.getElementById('bouquet');
-  const layers = Object.fromEntries(['stems','foliage','flowers','ribbon','accents'].map(id => [id, document.getElementById(id)]));
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const status = document.getElementById('status');
-  const pause = document.getElementById('pause');
-  const totalTime = 16500;
+  const layers = Object.fromEntries(['paper-back','stems','foliage','flowers','paper-front','ribbon'].map(id => [id, document.getElementById(id)]));
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const pauseButton = document.getElementById('pause');
+  let drawingEnd = 0;
   let elapsed = 0;
-  let previousTime = null;
-  let frame = null;
+  let previous = null;
+  let frame;
   let paused = false;
-  let completed = false;
+  let finished = false;
 
-  function group(parent, x, y, rotation = 0, scale = 1) {
-    const g = document.createElementNS(NS, 'g');
-    g.setAttribute('transform', `translate(${x} ${y}) rotate(${rotation}) scale(${scale})`);
+  function group(parent,x=0,y=0,angle=0,scale=1) {
+    const g=document.createElementNS(NS,'g');
+    g.setAttribute('transform',`translate(${x} ${y}) rotate(${angle}) scale(${scale})`);
     parent.append(g);
     return g;
   }
-
-  function path(parent, d, {stroke = '#6d8163', fill = 'none', width = 1.3, delay = 0, duration = 1.8, opacity = .92} = {}) {
-    const p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', d);
-    p.setAttribute('stroke', stroke);
-    p.setAttribute('stroke-width', width);
-    p.setAttribute('fill', fill);
-    p.setAttribute('class', `ink${fill === 'none' ? ' line' : ''}`);
-    p.style.setProperty('--delay', `${delay}s`);
-    p.style.setProperty('--draw-time', `${duration}s`);
-    p.style.setProperty('--wash', opacity);
+  function path(parent,d,{fill='none',stroke='#6a886d',width=1,delay=0,duration=1.4,opacity=1,wash=1.2}={}) {
+    const p=document.createElementNS(NS,'path');
+    for(const [k,v] of Object.entries({d,fill,stroke,'stroke-width':width,class:'ink'}))p.setAttribute(k,v);
     parent.append(p);
-    p.style.setProperty('--length', Math.ceil(p.getTotalLength()) + 2);
+    p.style.setProperty('--length',Math.ceil(p.getTotalLength())+2);
+    p.style.setProperty('--delay',`${delay}s`);
+    p.style.setProperty('--duration',`${duration}s`);
+    p.style.setProperty('--wash-duration',`${wash}s`);
+    p.style.setProperty('--opacity',opacity);
+    drawingEnd=Math.max(drawingEnd,delay+duration,fill==='none'?0:delay+duration*.55+wash);
     return p;
   }
-
-  function circle(parent, x, y, r, opts) {
-    return path(parent, `M ${x-r} ${y} a ${r} ${r} 0 1 0 ${r*2} 0 a ${r} ${r} 0 1 0 ${-r*2} 0`, opts);
+  function dot(parent,x,y,r,options) {
+    return path(parent,`M${x-r} ${y}a${r} ${r} 0 1 0 ${2*r} 0a${r} ${r} 0 1 0 ${-2*r} 0`,options);
   }
 
-  // Long, slightly irregular stems gather naturally beneath the ribbon.
-  const stems = [
-    'M332 605C358 488 309 322 263 264',
-    'M356 611C341 490 380 350 386 222',
-    'M345 602C375 412 332 280 330 129',
-    'M325 598C350 468 437 324 446 154',
-    'M366 603C356 500 453 385 474 310',
-    'M347 603C322 491 239 421 216 353',
-    'M336 595C352 465 474 337 526 241',
-    'M363 592C328 436 226 267 198 149',
-    'M354 598C376 457 466 259 510 153',
-    'M341 589C303 465 195 358 144 268',
-    'M346 579C374 472 504 401 559 310',
-    'M340 581C316 453 222 361 180 235'
-  ];
-  stems.forEach((d, i) => path(layers.stems, d, {width: i < 6 ? 2.1 : 1.4, stroke: ['#758967','#8b9976','#819171'][i%3], delay:.25+i*.11, duration:2.5}));
-  path(layers.stems, 'M339 601C354 500 343 406 345 335', {stroke:'#b6aa78',width:1.2,delay:1.1,duration:2});
+  // The flared back sheets frame the flowers before the front is folded over.
+  path(layers['paper-back'],'M109 278L54 334Q144 441 225 592L311 703L393 516L473 343L432 247L360 307L293 254L212 312Z',{fill:'url(#back-paper)',stroke:'#c9aba6',width:1.2,delay:.1,duration:2.4});
+  path(layers['paper-back'],'M348 364L488 290L548 346Q452 462 377 625L316 711L286 522Z',{fill:'url(#rose-paper)',stroke:'#bc919e',width:1.1,delay:.35,duration:2.1});
+  path(layers['paper-back'],'M117 309L73 337L221 523L296 659L237 438Z',{fill:'url(#fold)',stroke:'#d1b3a8',width:.9,delay:.6,duration:1.7});
+  path(layers['paper-back'],'M57 337Q159 456 230 591M490 296L538 346Q439 474 378 614',{stroke:'#c09c6b',width:1.3,delay:1.2,duration:1.8});
+  path(layers['paper-back'],'M63 337Q163 458 235 590M491 302L532 346Q434 475 375 608',{stroke:'#e5cda5',width:.65,delay:1.45,duration:1.8});
 
-  function leaf(x,y,size,angle,delay,kind = 'point') {
-    const g = group(layers.foliage,x,y,angle);
-    const round = kind === 'round';
-    const d = round
-      ? `M0 0C${-size*.9} ${-size*.3} ${-size*.9} ${-size*1.2} ${-size*.1} ${-size*1.25}C${size*.8} ${-size*1.4} ${size*.9} ${-size*.35} 0 0Z`
-      : `M0 0C${-size*.65} ${-size*.36} ${-size*.45} ${-size*.95} ${size*.1} ${-size*1.55}C${size*.6} ${-size*.95} ${size*.7} ${-size*.3} 0 0Z`;
-    path(g,d,{stroke:round?'#7d9a8c':'#73896b',fill:`url(#${round?'eucalyptus':'leaf'}-wash)`,width:1.05,delay,duration:1.3,opacity:round?.72:.84});
-    path(g,`M0 0Q${size*.03} ${-size*.6} ${size*.1} ${-size*(round?1.12:1.45)}`,{stroke:round?'#759587':'#6c8364',width:.7,delay:delay+.55,duration:.9});
-    if (!round) {
-      path(g,`M${size*.03} ${-size*.45}L${-size*.24} ${-size*.75}M${size*.05} ${-size*.7}L${size*.32} ${-size*.99}`,{stroke:'#7f9775',width:.55,delay:delay+.8,duration:.6});
+  // Stems taper into the wrapping; only their tips show below the paper.
+  [[191,188],[325,135],[394,246],[265,291],[155,307],[447,175],[214,110],[292,84],[104,246],[486,281],[335,218],[351,366]].forEach(([x,y],i)=>{
+    path(layers.stems,`M${288+i*2.3} ${737+Math.sin(i)*6}C${310+i*2} 600 ${x+30} 405 ${x} ${y}`,{stroke:['#6c8465','#839574','#597b65'][i%3],width:1.5,delay:.65+i*.075,duration:2.3});
+  });
+  function leaf(parent,x,y,size,angle,delay,round=false) {
+    const g=group(parent,x,y,angle);
+    const d=round?`M0 0C${-size*.9} ${-size*.2} ${-size} ${-size*1.3} ${-size*.05} ${-size*1.28}C${size*.9} ${-size*1.3} ${size*.85} ${-size*.25} 0 0Z`:`M0 0C${-size*.75} ${-size*.5} ${-size*.4} ${-size*1.3} ${size*.18} ${-size*1.8}C${size*.15} ${-size*1.16} ${size*.96} ${-size*.6} 0 0Z`;
+    path(g,d,{fill:`url(#${round?'eucalyptus':'leaf'})`,stroke:round?'#7a9d8d':'#587d66',width:.85,delay,duration:1.1,opacity:.96});
+    path(g,`M0 0Q${size*.02} ${-size*.7} ${size*(round?.04:.18)} ${-size*(round?1.15:1.65)}`,{stroke:round?'#719789':'#d2d6ad',width:.65,delay:delay+.35,duration:.9});
+    if(!round)path(g,`M0 ${-size*.4}L${-size*.25} ${-size*.76}M${size*.03} ${-size*.68}L${size*.35} ${-size*.98}M${size*.06} ${-size*.94}L${-size*.13} ${-size*1.2}`,{stroke:'#b8c5a1',width:.42,delay:delay+.55,duration:.8});
+  }
+  [
+    [170,365,34,-75],[138,322,32,-76],[110,277,25,-61],[106,221,27,-38],[130,178,32,-45],[171,145,29,-37],
+    [241,147,30,-23],[267,120,29,-13],[342,122,30,13],[385,137,32,37],[452,170,29,54],[483,218,29,63],
+    [481,305,31,74],[442,361,33,64],[392,398,31,68],[250,397,29,-51],[206,348,26,-14],[354,300,27,29],
+    [301,240,32,-27],[401,230,30,35],[184,250,27,-55],[462,332,26,85],[295,421,29,-28],[337,423,32,44]
+  ].forEach(([x,y,s,a],i)=>leaf(layers.foliage,x,y,s,a,1.15+i*.065));
+
+  function eucalyptus(points,delay) {
+    const [start,...rest]=points;
+    path(layers.stems,`M${start[0]} ${start[1]}${rest.map(p=>`L${p[0]} ${p[1]}`).join('')}`,{stroke:'#829e86',width:1.15,delay,duration:2});
+    points.slice(1).forEach(([x,y],i)=>leaf(layers.foliage,x,y,23-i*1.8,i%2?-55:48,delay+.3+i*.13,true));
+  }
+  eucalyptus([[208,371],[146,297],[101,239],[95,193],[113,152],[138,117],[157,90]],1.5);
+  eucalyptus([[398,371],[464,316],[501,260],[513,216],[501,168],[476,132],[458,95]],1.7);
+  eucalyptus([[304,229],[300,168],[283,125],[259,86],[245,58]],1.8);
+
+  function fern(x,y,angle,scale,delay) {
+    const g=group(layers.foliage,x,y,angle,scale);
+    path(g,'M0 105Q-6 39 0-28',{stroke:'#79916f',width:1,delay,duration:1.6});
+    for(let i=0;i<10;i++) {
+      const yy=83-i*11,ss=21-i*1.5;
+      [-1,1].forEach(side=>path(g,`M0 ${yy}Q${side*ss} ${yy-4} ${side*ss*1.17} ${yy-23}Q${side*ss*.2} ${yy-14} 0 ${yy}Z`,{stroke:'#819775',fill:'#98ae83',width:.6,delay:delay+.4+i*.06,duration:.8}));
     }
   }
-
-  [
-    [328,508,42,-51],[364,483,44,48],[306,457,45,-70],[387,449,41,54],
-    [284,417,35,-61],[421,414,39,68],[245,381,31,-62],[440,371,32,55],
-    [283,337,35,30],[363,340,38,-40],[391,305,31,45],[329,258,28,-39],
-    [323,205,24,-48],[330,186,20,41],[450,226,27,64],[454,261,28,-30],
-    [215,261,25,-59],[228,290,31,48],[244,316,35,-51],[488,282,26,58],
-    [483,349,30,75],[521,364,23,63],[535,348,21,-24],[548,326,18,58]
-  ].forEach(([x,y,s,a],i) => leaf(x,y,s,a,1.7+i*.065));
-
-  // Eucalyptus and airy sprigs keep the silhouette loose and botanical.
-  path(layers.stems,'M286 435C232 393 181 310 161 229',{stroke:'#829b8b',delay:1.6,duration:2.2});
-  [[231,375,24,-68],[218,354,24,24],[203,332,23,-63],[187,303,21,24],[174,278,19,-53],[163,251,17,20],[158,230,14,-11]].forEach(([x,y,s,a],i)=>leaf(x,y,s,a,2.1+i*.16,'round'));
-  path(layers.stems,'M424 401C456 338 527 278 558 205',{stroke:'#829b8b',delay:1.7,duration:2.2});
-  [[469,330,21,-22],[487,307,22,65],[507,282,20,-20],[526,254,18,63],[541,229,17,-18],[554,207,13,20]].forEach(([x,y,s,a],i)=>leaf(x,y,s,a,2.5+i*.15,'round'));
+  fern(98,316,-53,.87,2.1);
+  fern(458,318,52,.9,2.2);
+  fern(368,105,12,.7,2.25);
 
   function lavender(x,y,angle,scale,delay) {
-    const g = group(layers.flowers,x,y,angle,scale);
-    path(g,'M0 100Q-5 38 0-37',{stroke:'#849077',width:1.2,delay,duration:1.8});
-    for(let i=0;i<10;i++) {
-      const yy=39-i*7;
-      const extent=10-(i*.55);
-      [-1,1].forEach((side,j)=>{
-        path(g,`M0 ${yy+7}C${side*extent*2} ${yy+3} ${side*extent*1.55} ${yy-12} ${side*extent*.45} ${yy-6}Q${side*2} ${yy-2} 0 ${yy+7}Z`,{stroke:'#8c7e9b',fill:i%2?'#b7a6c9':'#c7b9d4',width:.8,delay:delay+.5+i*.055+j*.04,duration:.8,opacity:.9});
-      });
+    const g=group(layers.flowers,x,y,angle,scale);
+    path(g,'M0 95Q-3 25 0-36',{stroke:'#7d9073',width:1,delay,duration:1.6});
+    for(let i=0;i<11;i++) {
+      const yy=40-i*7,ss=10-i*.6;
+      [-1,1].forEach(side=>path(g,`M0 ${yy+6}C${side*ss*2} ${yy+3} ${side*ss*1.6} ${yy-12} ${side*ss*.4} ${yy-6}Q0 ${yy-1} 0 ${yy+6}Z`,{stroke:'#8c769d',fill:i%3?'#c4b0d3':'#a78fbf',width:.65,delay:delay+.4+i*.055,duration:.7}));
     }
-    path(g,'M-1 68Q-21 64-23 43M0 80Q14 72 18 56',{stroke:'#839273',width:1,delay:delay+.7,duration:1});
   }
-  lavender(195,168,-24,1.04,3.6);
-  lavender(224,159,-9,.75,3.9);
-  lavender(508,145,26,.94,4.1);
-  lavender(479,115,6,.73,4.25);
+  lavender(167,83,-24,.86,2.7);
+  lavender(193,75,-7,.7,2.8);
+  lavender(424,89,21,.92,2.9);
+  lavender(446,120,34,.76,3);
 
-  function rose(x,y,r,angle,delay,peony=false) {
+  const palettes={coral:['#b86e77','#ffe3ce'],wine:['#963d61','#efb8c1'],pink:['#bc829b','#fff0e9'],cream:['#c4a397','#fffdf4'],apricot:['#ca9870','#fff0ce']};
+  function rose(x,y,r,angle,delay,color='coral',ruffled=false) {
     const g=group(layers.flowers,x,y,angle);
-    const stroke=peony?'#b46f8a':'#bc786a';
-    const fill=`url(#${peony?'peony':'rose'}-wash)`;
-    const rings=peony?[[8,1],[7,.72],[5,.45],[4,.23]]:[[7,1],[5,.73],[4,.46],[3,.24]];
+    const [stroke,highlight]=palettes[color];
+    const rings=ruffled?[[9,1],[8,.75],[7,.52],[5,.31],[4,.15]]:[[6,1],[6,.76],[5,.53],[4,.32],[3,.16]];
     rings.forEach(([count,mult],ring)=>{
       for(let i=0;i<count;i++) {
-        const rr=r*mult*(1+Math.sin(i*5.3+ring)*.06);
-        const p=group(g,0,0,(360/count)*i+ring*33);
-        const d=`M${-rr*.17} ${rr*.24}C${-rr*.65} ${rr*.21} ${-rr*1.03} ${-rr*.29} ${-rr*.77} ${-rr*.65}C${-rr*.64} ${-rr*.98} ${-rr*.26} ${-rr*1.06} ${-rr*.03} ${-rr*.91}C${rr*.25} ${-rr*1.07} ${rr*.7} ${-rr*.91} ${rr*.75} ${-rr*.56}C${rr*.93} ${-rr*.11} ${rr*.43} ${rr*.22} ${-rr*.17} ${rr*.24}Z`;
-        path(p,d,{stroke,fill,width:ring===0?1.25:1,delay:delay+ring*.4+i*.08,duration:1.3,opacity:.95});
-        if (ring < 2 && i%2===0) path(p,`M${-rr*.53} ${-rr*.59}Q${-rr*.35} ${-rr*.78} ${-rr*.1} ${-rr*.72}`,{stroke:peony?'#bc8095':'#c88779',width:.65,delay:delay+ring*.4+i*.08+.6,duration:.8});
+        const rr=r*mult*(1+Math.sin(i*3.7+ring*5)*.09);
+        const p=group(g,Math.sin(i*2.1+ring)*r*.035,Math.cos(i*2.8)*r*.025,i*360/count+ring*29+Math.sin(i)*7);
+        const top=ruffled
+          ?`C${-rr*.75} ${-rr*.72} ${-rr*.7} ${-rr*.97} ${-rr*.47} ${-rr*.88}Q${-rr*.35} ${-rr*1.14} ${-rr*.16} ${-rr*.96}Q${rr*.06} ${-rr*1.15} ${rr*.2} ${-rr*.95}Q${rr*.45} ${-rr*1.09} ${rr*.57} ${-rr*.86}Q${rr*.8} ${-rr*.92} ${rr*.79} ${-rr*.57}`
+          :`C${-rr*.73} ${-rr*.92} ${-rr*.29} ${-rr*1.12} ${rr*.03} ${-rr*.94}C${rr*.37} ${-rr*1.05} ${rr*.82} ${-rr*.88} ${rr*.79} ${-rr*.57}`;
+        const d=`M${-rr*.14} ${rr*.22}C${-rr*.59} ${rr*.24} ${-rr*1.02} ${-rr*.29} ${-rr*.75} ${-rr*.64}${top}C${rr*.9} ${-rr*.13} ${rr*.33} ${rr*.22} ${-rr*.14} ${rr*.22}Z`;
+        const dd=delay+ring*.32+i*.055;
+        path(p,d,{fill:`url(#${color})`,stroke,width:ring?.8:1.05,delay:dd,duration:1.2});
+        path(p,`M${-rr*.55} ${-rr*.65}Q${-rr*.29} ${-rr*.89} ${rr*.02} ${-rr*.79}Q${rr*.4} ${-rr*.91} ${rr*.59} ${-rr*.62}`,{stroke:highlight,width:ruffled?.9:.8,delay:dd+.35,duration:.85,opacity:.6});
+        if(ruffled&&ring<2)path(p,`M${-rr*.35} ${-rr*.68}Q${-rr*.16} ${-rr*.43} ${-rr*.1} ${-rr*.2}M${rr*.32} ${-rr*.72}Q${rr*.15} ${-rr*.42} ${rr*.07} ${-rr*.2}`,{stroke,width:.45,delay:dd+.6,duration:.7});
       }
     });
-    path(g,'M-6 1C-10-10 10-11 9-1C8 5-2 7-4 1C-7-5 3-6 4-2',{stroke:peony?'#a85f7b':'#ac665e',width:1.2,delay:delay+2.1,duration:1.2});
+    path(g,'M-4 2C-10-6 4-12 8-4C13 4-4 8-5 1Q-5-5 3-2',{stroke,width:1,delay:delay+2,duration:1.1});
   }
 
-  function poppy(x,y,r,angle,delay) {
+  function lily(x,y,r,angle,delay) {
     const g=group(layers.flowers,x,y,angle);
-    for(let i=0;i<5;i++) {
-      const p=group(g,0,0,i*72+7);
-      path(p,`M-5 5C${-r*.7} ${r*.05} ${-r*.96} ${-r*.55} ${-r*.6} ${-r*.84}Q${-r*.3} ${-r*1.05} 0 ${-r*.86}Q${r*.36} ${-r*1.08} ${r*.66} ${-r*.83}C${r} ${-r*.39} ${r*.54} 3-5 5Z`,{stroke:'#c79a68',fill:'url(#poppy-wash)',width:1.1,delay:delay+i*.13,duration:1.5,opacity:.92});
-      path(p,`M-2-8Q${-r*.28} ${-r*.4} ${-r*.34} ${-r*.71}M3-9Q${r*.3} ${-r*.39} ${r*.39} ${-r*.68}`,{stroke:'#cd9f6c',width:.65,delay:delay+.7+i*.1,duration:.9});
+    [0,120,240,60,180,300].forEach((angle,i)=>{
+      const p=group(g,0,0,angle);
+      path(p,`M0 7C${-r*.2} ${-r*.12} ${-r*.6} ${-r*.48} ${-r*.35} ${-r*.83}Q${-r*.25} ${-r*1.12} ${r*.12} ${-r*1.2}C${-r*.02} ${-r*.84} ${r*.38} ${-r*.71} ${r*.24} ${-r*.39}Q${r*.12} ${-r*.13} 0 7Z`,{fill:'url(#lily)',stroke:'#bf9b9e',width:.95,delay:delay+i*.12,duration:1.4});
+      path(p,`M0 0Q${-r*.08} ${-r*.51} ${r*.08} ${-r*1.08}`,{stroke:'#d4a8b2',width:.7,delay:delay+.6+i*.1,duration:1});
+      for(let j=0;j<6;j++)dot(p,Math.sin(j*3)*r*.09,-r*(.15+j*.055),.65,{fill:'#b6758b',stroke:'none',delay:delay+1+i*.08,duration:.3});
+    });
+    for(let i=0;i<6;i++) {
+      const a=i*1.05,xx=Math.cos(a)*20,yy=Math.sin(a)*15-9;
+      path(g,`M0 4Q${xx*.7} ${yy*.3-8} ${xx} ${yy}`,{stroke:'#9a9a63',width:1,delay:delay+1.6+i*.04,duration:.7});
+      path(g,`M${xx-2} ${yy-2}q5-4 6 1q-2 5-6-1`,{stroke:'#987747',fill:'#b69a60',width:.8,delay:delay+2+i*.04,duration:.5});
     }
-    for(let i=0;i<17;i++) {
-      const a=i*Math.PI*2/17;
-      const xx=Math.cos(a)*12, yy=Math.sin(a)*12;
-      path(g,`M0 0L${xx} ${yy}`,{stroke:'#85775e',width:.7,delay:delay+1.25+i*.025,duration:.6});
-      circle(g,xx,yy,1.4,{stroke:'#86745b',fill:'#9a8969',width:.5,delay:delay+1.5+i*.025,duration:.5});
-    }
-    circle(g,0,0,6.5,{fill:'#c3b47d',stroke:'#8e8e61',width:1,delay:delay+1.9,duration:.9});
-    path(g,'M-5 0H5M0-5V5M-4-4L4 4M4-4L-4 4',{stroke:'#8c8e64',width:.6,delay:delay+2.2,duration:.6});
   }
-
+  function tulip(x,y,angle,delay) {
+    const g=group(layers.flowers,x,y,angle);
+    path(g,'M0 40C-33 26-35-6-20-22Q-10-16-2-20Q12-31 24-22C39 2 31 31 0 40Z',{stroke:'#c2858b',fill:'url(#coral)',width:1,delay,duration:1.4});
+    path(g,'M0 40C-22 20-19-9-21-22Q1-16 9 5Q17 25 0 40Z',{stroke:'#c2858b',fill:'url(#pink)',width:.85,delay:delay+.3,duration:1.2});
+    path(g,'M0 40Q-2 15 24-22Q41 8 16 31Z',{stroke:'#c2858b',fill:'url(#coral)',width:.85,delay:delay+.5,duration:1.2});
+    path(g,'M-5 31Q-17 14-16-10M6 29Q13 10 21-10',{stroke:'#f9d2cc',width:.8,delay:delay+1,duration:.8});
+  }
   function daisy(x,y,r,angle,delay) {
     const g=group(layers.flowers,x,y,angle);
-    for(let i=0;i<13;i++) {
-      const p=group(g,0,0,i*360/13);
-      const rr=r*(1+.065*Math.sin(i*8));
-      path(p,`M-3-3C-8-12-12 ${-rr*.8}-5 ${-rr}C2 ${-rr*1.14} 11 ${-rr*.96} 8 ${-rr*.72}L4-4Z`,{stroke:'#b8ac8e',fill:'url(#daisy-wash)',width:.95,delay:delay+i*.07,duration:1.1,opacity:.98});
-      path(p,`M0-11L1 ${-rr*.78}`,{stroke:'#d9cdb1',width:.6,delay:delay+.5+i*.07,duration:.7});
+    for(let i=0;i<12;i++) {
+      const p=group(g,0,0,i*30);
+      const rr=r*(1+Math.sin(i*4)*.07);
+      path(p,`M-3-3C-6-12-11 ${-rr*.85}-4 ${-rr}C4 ${-rr*1.1} 9 ${-rr*.88} 6 ${-rr*.66}L3-3Z`,{stroke:'#c8b996',fill:'url(#cream)',width:.7,delay:delay+i*.045,duration:.9});
+      path(p,`M0-8L1 ${-rr*.8}`,{stroke:'#e1cfb2',width:.45,delay:delay+.4+i*.045,duration:.6});
     }
-    circle(g,0,0,10,{stroke:'#b39754',fill:'#dfbf6b',width:1.1,delay:delay+1.2,duration:1});
-    for(let i=0;i<23;i++) {
-      const a=i*2.4, rr=Math.sqrt(i)*1.6;
-      circle(g,Math.cos(a)*rr,Math.sin(a)*rr,.65,{stroke:'#a88b4b',fill:'#a88b4b',width:.4,delay:delay+1.55+i*.017,duration:.4});
-    }
+    dot(g,0,0,r*.23,{stroke:'#b08e4a',fill:'#dfbd68',width:.8,delay:delay+.8,duration:.7});
+    for(let i=0;i<16;i++)dot(g,Math.cos(i*2.4)*Math.sqrt(i)*r*.045,Math.sin(i*2.4)*Math.sqrt(i)*r*.045,.65,{stroke:'#9c7c43',fill:'#ac8d48',width:.3,delay:delay+1.15,duration:.4});
   }
-
-  function cosmos(x,y,r,angle,delay) {
-    const g=group(layers.flowers,x,y,angle);
-    for(let i=0;i<8;i++) {
-      const p=group(g,0,0,i*45);
-      path(p,`M-3-2L${-r*.36} ${-r*.7}Q${-r*.48} ${-r*1.05} ${-r*.19} ${-r*.94}L0 ${-r}L${r*.17} ${-r*.91}Q${r*.43} ${-r*1.02} ${r*.36} ${-r*.7}L4-2Z`,{stroke:'#c08899',fill:'url(#cosmos-wash)',width:1,delay:delay+i*.1,duration:1.2,opacity:.94});
-      path(p,`M0-8L${-r*.12} ${-r*.82}M3-9L${r*.15} ${-r*.78}`,{stroke:'#ca92a1',width:.55,delay:delay+i*.1+.6,duration:.7});
-    }
-    circle(g,0,0,7,{stroke:'#ad9654',fill:'#d8b66a',width:1,delay:delay+1.3,duration:.9});
-    for(let i=0;i<9;i++) circle(g,Math.cos(i*2.4)*4,Math.sin(i*2.4)*4,.8,{stroke:'#9f854b',fill:'#b39550',width:.6,delay:delay+1.7,duration:.5});
-  }
-
-  function blueFlower(x,y,r,delay) {
+  function hydrangea(x,y,r,delay) {
     const g=group(layers.flowers,x,y);
-    for(let i=0;i<5;i++) {
-      const p=group(g,0,0,i*72);
-      path(p,`M-1 1C${-r} ${-r*.3} ${-r*.8} ${-r*1.3} 0 ${-r}C${r*.9} ${-r*1.3} ${r} ${-r*.2} 1 1Z`,{stroke:'#8a9fa6',fill:i%2?'#bfd1d5':'#aec7ce',width:.8,delay:delay+i*.07,duration:.8});
+    for(let i=0;i<18;i++) {
+      const a=i*2.4,rr=Math.sqrt(i/18)*r;
+      const f=group(g,Math.cos(a)*rr,Math.sin(a)*rr,Math.sin(i)*35);
+      for(let j=0;j<4;j++) {
+        const p=group(f,0,0,j*90);
+        path(p,'M0 1C-10-1-13-10-6-13Q0-17 5-11Q10-3 0 1Z',{stroke:'#839eb8',fill:'url(#blue)',width:.7,delay:delay+i*.035+j*.03,duration:.85});
+        path(p,'M0-2L-3-10',{stroke:'#e0edf0',width:.5,delay:delay+.4+i*.035,duration:.6});
+      }
+      dot(f,0,0,1.6,{stroke:'#b6a77a',fill:'#ecddab',width:.5,delay:delay+.7+i*.035,duration:.5});
     }
-    circle(g,0,0,2,{stroke:'#baa66b',fill:'#dfcc8a',width:.6,delay:delay+.65,duration:.5});
   }
 
-  poppy(329,141,43,-15,4.8);
-  cosmos(438,183,40,9,5.3);
-  [[519,258,12],[539,243,11],[514,233,13],[535,217,10],[495,250,10],[546,265,9]].forEach(([x,y,r],i)=>{
-    path(layers.stems,`M498 302Q512 270 ${x} ${y}`,{stroke:'#8b9b7c',width:1,delay:3.3+i*.1,duration:1.5});
-    blueFlower(x,y,r,6.4+i*.12);
-  });
-  rose(386,267,58,12,6.05,true);
-  rose(265,280,61,-18,5.65);
-  daisy(465,341,39,12,7.1);
-  daisy(219,377,32,-9,7.6);
-  cosmos(341,368,31,-12,7.85);
+  // Back-to-front placement makes a dense, rounded crown.
+  tulip(219,107,-18,3.2);
+  tulip(287,72,13,3.5);
+  rose(330,151,54,15,3.7,'wine');
+  hydrangea(112,245,33,4);
+  hydrangea(479,277,35,4.2);
+  lily(431,191,52,28,4.3);
+  rose(197,210,65,-18,4.6,'coral');
+  daisy(331,235,29,8,4.9);
+  rose(391,296,63,15,5.1,'cream',true);
+  rose(165,327,46,-17,5.4,'apricot');
+  rose(273,313,68,4,5.7,'pink',true);
+  rose(337,395,43,-23,6.2,'coral');
+  daisy(452,363,26,8,6.4);
+  daisy(111,339,24,-12,6.6);
 
-  // A few tiny buds and airy baby's breath are drawn last.
-  [[154,317],[161,349],[185,337],[547,352],[560,332],[579,312]].forEach(([x,y],i)=>{
-    path(layers.stems,`M${i<3?252:468} 440Q${x+10} ${y+20} ${x} ${y}`,{stroke:'#96a184',width:.8,delay:3.2+i*.15,duration:2});
-    for(let j=0;j<3;j++) {
-      const xx=x+(j-1)*8, yy=y-Math.sin(j*2)*8;
-      circle(layers.flowers,xx,yy,3.6,{stroke:'#b5ac8f',fill:'#faf5df',width:.8,delay:8.4+i*.12+j*.08,duration:.7});
+  // Tiny sprays of baby's breath soften the edges.
+  [[80,278],[97,211],[143,151],[356,86],[469,147],[518,322],[410,403],[215,397]].forEach(([x,y],i)=>{
+    const g=group(layers.flowers,x,y);
+    for(let j=0;j<5;j++) {
+      const xx=Math.cos(j*2.4)*14,yy=Math.sin(j*2.4)*16;
+      path(g,`M0 26Q${xx*.5} ${yy+8} ${xx} ${yy}`,{stroke:'#93a084',width:.6,delay:5.8+i*.07,duration:1.2});
+      for(let k=0;k<4;k++)dot(g,xx+Math.cos(k*1.57)*2.3,yy+Math.sin(k*1.57)*2.3,2.2,{fill:'#fffdf0',stroke:'#c4bea0',width:.5,delay:6.3+i*.07+j*.04,duration:.7});
     }
   });
-  leaf(280,198,16,10,3.9);
-  path(layers.flowers,'M276 182C257 167 265 149 278 151C294 146 302 165 283 184Z',{stroke:'#bc8b86',fill:'#e4b1ad',width:1.1,delay:6.2,duration:1.4});
-  path(layers.flowers,'M279 181Q272 168 279 153M280 183Q294 168 290 158',{stroke:'#b27c79',width:.8,delay:6.9,duration:1});
-  path(layers.stems,'M326 345Q277 271 280 183',{stroke:'#829171',width:1.3,delay:1.5,duration:2.3});
 
-  // Soft silk bow, with its own folds and two loose tails.
-  const bow=group(layers.ribbon,350,514,-5);
-  const ribbon={stroke:'#aa7b75',fill:'url(#ribbon-wash)',width:1.2,duration:1.6,opacity:.92};
-  path(bow,'M-4 0C-23-27-69-38-67-14C-66 5-30 11-4 5Z',{...ribbon,delay:10});
-  path(bow,'M5 0C23-28 58-29 61-14C64 5 26 13 4 7Z',{...ribbon,delay:10.3});
-  path(bow,'M-5 6C-13 34-23 54-40 68L-44 52L-58 52C-32 34-23 18-13 3Z',{...ribbon,delay:10.5});
-  path(bow,'M5 5C15 26 9 50 26 71L32 57L46 62C25 37 28 12 12 1Z',{...ribbon,delay:10.7});
-  path(bow,'M-11-5Q-1-9 9-3L12 8Q0 14-10 8Z',{...ribbon,delay:10.95,duration:1.1});
-  path(bow,'M-16 1Q-39-15-56-17M15 1Q36-13 51-15M-15 14Q-25 39-42 52M14 17Q15 42 28 54',{stroke:'#af807b',width:.75,delay:11.2,duration:1});
+  // Broad visible panels, curled edges, seams, and fine gold trim.
+  const front=layers['paper-front'];
+  path(front,'M101 378Q144 409 208 421Q246 447 284 479L339 696Q314 723 278 717Q231 594 174 501Z',{fill:'url(#rose-paper)',stroke:'#b9929d',width:1.15,delay:8.1,duration:2.1});
+  path(front,'M101 378Q137 429 164 493Q202 539 231 587L208 421Q146 408 101 378Z',{fill:'url(#fold)',stroke:'#c7a49e',width:.95,delay:8.3,duration:1.8});
+  path(front,'M497 371Q448 418 377 444Q317 481 273 559Q300 634 322 720L365 712Q395 592 439 499Z',{fill:'url(#ivory-paper)',stroke:'#c7aca0',width:1.2,delay:8.5,duration:2.2});
+  path(front,'M497 371Q470 425 438 499Q417 537 391 577L377 444Q446 420 497 371Z',{fill:'url(#fold)',stroke:'#cfb7a6',width:.95,delay:8.7,duration:1.8});
+  path(front,'M208 421Q234 498 284 582L321 716M377 444Q363 520 321 581L357 710',{stroke:'#b68d97',width:.8,delay:9.15,duration:1.7});
+  path(front,'M105 385Q148 421 204 428M494 379Q443 426 381 451',{stroke:'#b59a67',width:1.65,delay:9.2,duration:1.5});
+  path(front,'M110 392Q149 428 201 434M488 389Q439 433 384 458',{stroke:'#e3c89b',width:.65,delay:9.4,duration:1.4});
+  path(front,'M175 497Q224 591 272 694M440 494Q389 590 368 695M218 450Q232 509 258 550M366 470Q355 521 334 553',{stroke:'#fff6e9',width:1.25,delay:9.6,duration:1.2});
 
-  // Small ink flecks, like pollen suspended around the flowers.
-  [[164,197,2],[414,99,2],[566,280,1.5],[184,407,1.6],[477,406,1.5],[285,101,1.5],[121,289,1.5]].forEach(([x,y,r],i)=>circle(layers.accents,x,y,r,{stroke:'#beaa7c',fill:'#c6b58c',width:.5,delay:9.1+i*.15,duration:.6,opacity:.7}));
-  path(layers.accents,'M241 122Q236 111 243 108Q251 111 241 122M572 381Q583 368 585 377Q583 384 572 381',{stroke:'#c5a098',fill:'#e5c6bd',width:.8,delay:10.2,duration:1.3,opacity:.65});
+  // A satin bow anchors the wrapping, with curved loops and long tails.
+  const bow=group(layers.ribbon,309,580,-6);
+  const satin={fill:'url(#satin)',stroke:'#93475f',width:1.1,duration:1.5};
+  path(bow,'M-9 2C-22 43-29 88-65 125L-66 105L-89 107C-51 70-47 36-29 0Z',{...satin,fill:'url(#satin-tail)',delay:10.4});
+  path(bow,'M8 5C36 38 20 87 54 141L61 120L84 127C48 82 65 36 28-1Z',{...satin,fill:'url(#satin-tail)',delay:10.55});
+  path(bow,'M-6-2C-37-46-106-52-108-22C-111 13-55 28-5 10Z',{...satin,delay:10.8});
+  path(bow,'M6-2C41-43 100-48 106-22C115 13 54 28 6 10Z',{...satin,delay:11});
+  path(bow,'M-10 2C-48-20-90-31-101-20Q-75-8-10 8Z',{fill:'#a85472',stroke:'#9c4c6c',width:.7,delay:11.2,duration:1.2});
+  path(bow,'M11 2Q73-28 99-21Q66-3 10 9Z',{fill:'#a35070',stroke:'#984768',width:.7,delay:11.35,duration:1.2});
+  path(bow,'M-15-7Q0-13 14-5L18 13Q1 22-16 12Z',{...satin,delay:11.55,duration:1.1});
+  path(bow,'M-26-12Q-63-35-94-29M28-12Q66-33 93-27M-27 25Q-39 74-66 101M31 29Q41 77 58 112M-7-5L-3 12',{stroke:'#efb7bd',width:1.1,delay:11.8,duration:1.1});
 
-  function setStatus(text) {
-    if(status.textContent !== text) status.textContent=text;
-  }
+  // The dedication always starts after the final stroke and color wash.
+  const fromDelay=drawingEnd+.35;
+  const toDelay=fromDelay+1.2;
+  document.documentElement.style.setProperty('--from-delay',`${fromDelay}s`);
+  document.documentElement.style.setProperty('--to-delay',`${toDelay}s`);
+  const totalTime=(toDelay+1.75)*1000;
 
-  function finish() {
-    completed=true;
+  function complete() {
+    finished=true;
     document.body.classList.add('finished');
-    setStatus('A little bouquet. All yours, always.');
     frame=null;
   }
-
   function tick(now) {
-    if(previousTime !== null) elapsed += now-previousTime;
-    previousTime=now;
-    if(elapsed >= totalTime) { finish(); return; }
-    if(elapsed > 12700) setStatus('And a little note, from the heart…');
-    else if(elapsed > 9800) setStatus('Tying it all together…');
-    else if(elapsed > 4200) setStatus('One petal at a time…');
+    if(previous!==null)elapsed+=now-previous;
+    previous=now;
+    if(elapsed>=totalTime){complete();return;}
     frame=requestAnimationFrame(tick);
   }
-
   function reset() {
     cancelAnimationFrame(frame);
-    elapsed=0;
-    previousTime=null;
-    paused=false;
-    completed=false;
+    elapsed=0;previous=null;paused=false;finished=false;
     document.body.classList.remove('paused','finished');
-    pause.setAttribute('aria-label','Pause animation');
-    pause.title='Pause animation';
-    setStatus('A little love is taking shape…');
-    // Restart the complete timeline, including the handwritten dedication.
-    document.querySelectorAll('.gift *').forEach(element=>{
-      element.getAnimations().forEach(animation=>{
-        animation.currentTime=0;
-        animation.play();
-      });
-    });
-    if(reducedMotion.matches) finish();
+    pauseButton.setAttribute('aria-label','Pause animation');
+    pauseButton.title='Pause';
+    // Collect the timeline once so every stroke restarts in the same frame.
+    const animations=document.querySelector('.gift').getAnimations({subtree:true});
+    animations.forEach(animation=>{animation.currentTime=0;animation.play();});
+    if(motion.matches)complete();
     else frame=requestAnimationFrame(tick);
   }
-
-  pause.addEventListener('click',()=>{
-    if(completed) return;
+  pauseButton.addEventListener('click',()=>{
+    if(finished)return;
     paused=!paused;
     document.body.classList.toggle('paused',paused);
-    pause.setAttribute('aria-label',paused?'Resume animation':'Pause animation');
-    pause.title=paused?'Resume animation':'Pause animation';
-    if(paused) {
-      cancelAnimationFrame(frame);
-      previousTime=null;
-      setStatus('A little moment to pause.');
-    } else {
-      setStatus('A little love is taking shape…');
-      frame=requestAnimationFrame(tick);
-    }
+    pauseButton.setAttribute('aria-label',paused?'Resume animation':'Pause animation');
+    pauseButton.title=paused?'Resume':'Pause';
+    previous=null;
+    if(paused)cancelAnimationFrame(frame);
+    else frame=requestAnimationFrame(tick);
   });
   document.getElementById('replay').addEventListener('click',reset);
-  reducedMotion.addEventListener('change',reset);
-  // Fonts resolve before the dedication arrives; drawing never waits on a network.
-  if(reducedMotion.matches) finish();
+  motion.addEventListener('change',reset);
+  document.body.classList.remove('preparing');
+  if(motion.matches)complete();
   else frame=requestAnimationFrame(tick);
 })();
