@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3eb">
+  <meta name="description" content="A little bouquet, a lot of love. Watch a garden of flowers come to life, petal by petal. From Salah, to Thoraya.">
+  <title>For Thoraya — a little bouquet</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./bouquet.js" defer></script>
+</head>
+<body>
+  <div class="paper" aria-hidden="true"></div>
+  <header class="masthead">
+    <a class="wordmark" href="./" aria-label="A little bloom, home">
+      <svg viewBox="0 0 36 42" aria-hidden="true"><path d="M18 38V19M18 30Q5 30 6 20Q16 20 18 30M18 25Q29 25 29 16Q20 17 18 25"/><path class="logo-petals" d="M18 18C8 22 4 10 12 9C8 0 20-1 21 7C30 1 35 13 26 15C30 24 20 27 18 18Z"/><circle cx="19" cy="13" r="3"/></svg>
+      <span>a little bloom<span class="wordmark-dot">.</span></span>
+    </a>
+    <span class="masthead-note">SOMETHING LOVELY, JUST FOR YOU</span>
+    <span class="monogram" aria-label="Salah and Thoraya">S <span>♡</span> T</span>
+  </header>
+
+  <main>
+    <section class="gift" aria-labelledby="page-title">
+      <div class="intro">
+        <p class="eyebrow">A SMALL GESTURE. A WHOLE LOT OF HEART.</p>
+        <h1 id="page-title">Some feelings <em>bloom.</em></h1>
+        <p class="intro-note">For the things that words can’t quite say.</p>
+      </div>
+
+      <div class="drawing-stage" id="drawing-stage">
+        <div class="side-note note-left" aria-hidden="true"><span>a little joy</span><svg viewBox="0 0 95 60"><path d="M8 8Q22 48 81 42M72 34L83 42L72 49"/></svg></div>
+        <svg class="bouquet" id="bouquet" viewBox="90 60 520 580" role="img" aria-labelledby="bouquet-title bouquet-desc">
+          <title id="bouquet-title">A bouquet for Thoraya</title>
+          <desc id="bouquet-desc">Hand-drawn coral roses, a pink peony, an apricot poppy, cream daisies, a pink cosmos, lavender, and little blue flowers, with green foliage and a rose-colored ribbon.</desc>
+          <defs>
+            <radialGradient id="rose-wash" cx="38%" cy="35%" r="72%"><stop stop-color="#f7c1b2"/><stop offset=".65" stop-color="#e99887"/><stop offset="1" stop-color="#d77b71"/></radialGradient>
+            <radialGradient id="peony-wash" cx="36%" cy="28%" r="80%"><stop stop-color="#f4c2cb"/><stop offset=".65" stop-color="#de97ac"/><stop offset="1" stop-color="#cb7895"/></radialGradient>
+            <radialGradient id="poppy-wash" cx="35%" cy="27%" r="80%"><stop stop-color="#f9dbab"/><stop offset=".7" stop-color="#edb77b"/><stop offset="1" stop-color="#d99b65"/></radialGradient>
+            <radialGradient id="cosmos-wash"><stop stop-color="#dd9bab"/><stop offset="1" stop-color="#f2ccd1"/></radialGradient>
+            <linearGradient id="leaf-wash" x2="1" y2="1"><stop stop-color="#adc2a1"/><stop offset="1" stop-color="#6e9077"/></linearGradient>
+            <linearGradient id="eucalyptus-wash" x2=".8" y2="1"><stop stop-color="#bbcbc0"/><stop offset="1" stop-color="#87a79c"/></linearGradient>
+            <linearGradient id="ribbon-wash" x2=".8" y2="1"><stop stop-color="#ddb1a8"/><stop offset="1" stop-color="#be847f"/></linearGradient>
+            <radialGradient id="daisy-wash"><stop stop-color="#f0e3b9"/><stop offset=".35" stop-color="#fff9e9"/><stop offset="1" stop-color="#fffdf5"/></radialGradient>
+          </defs>
+          <g id="stems"></g>
+          <g id="foliage"></g>
+          <g id="flowers"></g>
+          <g id="ribbon"></g>
+          <g id="accents"></g>
+        </svg>
+        <div class="side-note note-right" aria-hidden="true"><span>all for you</span><svg viewBox="0 0 95 60"><path d="M84 8Q67 48 15 42M24 34L13 42L24 49"/></svg></div>
+      </div>
+
+      <div class="dedication" id="dedication">
+        <p class="signature" aria-label="From Salah, to Thoraya"><span class="signature-from" aria-hidden="true">From Salah,</span> <span class="signature-to" aria-hidden="true">to Thoraya</span><svg class="signature-heart" viewBox="0 0 45 42" aria-hidden="true"><path d="M23 35C17 29 4 21 6 12C8 3 18 4 22 13C25 3 37 4 38 13C39 22 28 31 23 35Z"/></svg></p>
+        <p class="dedication-note">EVERY PETAL, A LITTLE THOUGHT OF YOU.</p>
+      </div>
+
+      <div class="playback">
+        <div class="status-line"><span class="status-dot"></span><span id="status" role="status">A little love is taking shape…</span></div>
+        <div class="controls">
+          <button class="replay-button" id="replay" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.1 6.5A6.5 6.5 0 1 1 3.5 11M4 2v5h5"/></svg><span>Watch it bloom again</span></button>
+          <button class="pause-button" id="pause" type="button" aria-label="Pause animation" title="Pause animation"><svg class="pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg></button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>A FEW FLOWERS. A FEELING THAT STAYS.</span><span class="footer-heart" aria-hidden="true">♡</span><span>MADE WITH LOVE, BY SALAH</span></footer>
+  <noscript><p class="noscript-note">Please enable JavaScript to watch your bouquet bloom.</p></noscript>
+</body>
+</html>
