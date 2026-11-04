@@ -3,27 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f7f7ee">
+  <meta name="theme-color" content="#0c2420">
   <meta name="description" content="Things I like about you.">
   <title>Things I like about you</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./garden.css?v=1">
-  <script src="./notes.js?v=1" defer></script>
-  <script src="./garden.js?v=1" defer></script>
+  <link rel="preload" href="../fonts/parisienne.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./garden.css?v=2">
+  <script src="./notes.js?v=2" defer></script>
+  <script src="./garden.js?v=2" defer></script>
   <script src="./openings.js?v=1" defer></script>
 </head>
 <body>
+  <div class="atmosphere" aria-hidden="true"><div class="aurora aurora-one"></div><div class="aurora aurora-two"></div><div class="moonlight"></div></div>
+  <canvas id="fireflies" aria-hidden="true"></canvas>
   <main class="garden">
     <header class="introduction">
-      <svg class="title-botanical" id="title-botanical" viewBox="0 0 600 360" aria-hidden="true"></svg>
-      <h1><span class="title-first">Things I like</span> <span class="title-script">about you</span></h1>
-      <svg class="title-flourish" viewBox="0 0 130 28" aria-hidden="true"><path d="M5 16Q30 8 54 15M76 15Q101 8 125 16"/><path d="M65 20C51 11 57 4 65 10C73 4 79 11 65 20Z"/></svg>
+      <div class="halo" aria-hidden="true"></div>
+      <svg class="hero-botanical" id="hero-botanical" viewBox="0 0 700 800" aria-hidden="true"></svg>
+      <div class="title-composition">
+        <svg class="title-star" viewBox="0 0 60 60" aria-hidden="true"><path d="M30 4Q31 28 56 30Q31 32 30 56Q28 32 4 30Q28 28 30 4Z"/><circle cx="30" cy="30" r="20"/></svg>
+        <h1><span class="title-first">Things I like</span> <span class="title-script">about you</span></h1>
+        <svg class="title-flourish" viewBox="0 0 200 45" aria-hidden="true"><path class="flourish-line" pathLength="1" d="M4 23C30 5 53 38 83 23M117 23C147 38 170 5 196 23"/><path class="flourish-heart" d="M100 31C77 17 91 6 100 17C109 6 123 17 100 31Z"/></svg>
+      </div>
+      <div class="butterfly-flight" aria-hidden="true"><svg class="butterfly" viewBox="0 0 100 80"><g class="wing wing-left"><path d="M50 39C-8-20-6 49 45 44C-1 39 28 88 50 45Z"/></g><g class="wing wing-right"><path d="M50 39C108-20 106 49 55 44C101 39 72 88 50 45Z"/></g><path class="butterfly-body" d="M50 29V56M50 32L44 21M50 32L56 21"/></svg></div>
+      <div class="scroll-cue" aria-hidden="true"><span></span><svg viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></svg></div>
     </header>
     <section class="note-garden" aria-label="Things I like about you">
       <svg class="vine-art" id="vine-art" aria-hidden="true"></svg>
       <div id="notes" class="notes"></div>
-      <svg class="garden-ending" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 5V45M50 61C25 47 29 27 43 33L50 40L57 33C71 27 75 47 50 61Z"/><path d="M50 83Q29 76 23 64Q39 64 50 83M50 83Q71 76 77 64Q61 64 50 83"/></svg>
     </section>
+    <div class="garden-ending" aria-hidden="true"><svg id="ending-art" viewBox="0 0 400 300"></svg><span class="ending-spark"></span></div>
   </main>
+  <div id="petal-bursts" aria-hidden="true"></div>
 </body>
 </html>

@@ -1,55 +1,153 @@
 @font-face{font-family:Cormorant;src:url('../fonts/cormorant.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Cormorant;src:url('../fonts/cormorant-italic.ttf') format('truetype');font-style:italic;font-weight:400;font-display:swap}
 @font-face{font-family:Parisienne;src:url('../fonts/parisienne.ttf') format('truetype');font-weight:400;font-display:swap}
-:root{color-scheme:light;--paper:#f7f7ee;--green:#354f40;--ink:#4b5546;--rose:#b16f80;--gold:#b2a17a}
+:root{color-scheme:dark;--night:#0c2420;--gold:#dfc28a;--cream:#fcf0d9;--rose:#eaa69f;--ease:cubic-bezier(.16,1,.3,1)}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;min-width:280px;background:radial-gradient(ellipse at 5% 8%,#dce5ce66,transparent 38%),radial-gradient(ellipse at 95% 65%,#eeded65e,transparent 45%),linear-gradient(110deg,#faf9f1,#f5f5ea);color:var(--ink);-webkit-font-smoothing:antialiased}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:10;opacity:.18;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath d='M0 0h180v180H0z' opacity='.22' filter='url(%23g)'/%3E%3C/svg%3E")}
-.garden{max-width:1120px;margin:0 auto;padding:0 max(24px,env(safe-area-inset-right)) max(48px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
-.introduction{position:relative;isolation:isolate;height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:32px}
-.title-botanical{position:absolute;width:600px;max-width:100%;height:100%;inset:0;margin:auto;z-index:-1;overflow:visible}
-h1{font-weight:400;margin:0;text-align:center;line-height:1.05;color:var(--green)}
-.title-first{display:block;font-family:Cormorant,Georgia,serif;font-size:58px;letter-spacing:-1.5px}
-.title-script{display:block;font-family:Parisienne,cursive;font-size:91px;color:var(--rose);margin-top:-2px;transform:rotate(-5deg)}
-.title-flourish{width:106px;height:25px;stroke:#b7a883;fill:none;stroke-width:1;stroke-linecap:round;margin-top:16px}
-.note-garden{position:relative;max-width:930px;margin:0 auto;isolation:isolate}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;min-width:280px;background:var(--night);color:var(--cream);font-family:Cormorant,Georgia,serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.15;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath d='M0 0h150v150H0z' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E")}
+.atmosphere{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 50% 15%,#244b3d 0,transparent 62%),linear-gradient(155deg,#071a19,#13372a 53%,#091e1c)}
+.aurora{position:absolute;width:100vw;height:100vh;border-radius:50%;filter:blur(55px);opacity:.18;animation:aurora-drift 19s ease-in-out infinite alternate;will-change:transform}
+.aurora-one{top:-30%;left:-40%;background:radial-gradient(ellipse,#8fba75,transparent 62%)}
+.aurora-two{bottom:-40%;right:-40%;background:radial-gradient(ellipse,#b58563,transparent 60%);animation-delay:-9s}
+.moonlight{position:absolute;top:-40%;left:30%;width:30%;height:130%;background:linear-gradient(90deg,transparent,#dbe9bc0a,transparent);transform:rotate(25deg);filter:blur(18px)}
+#fireflies{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.garden{position:relative;max-width:1400px;margin:0 auto}
+.introduction{position:relative;isolation:isolate;height:900px;min-height:700px;max-height:1100px;height:100svh;display:grid;place-items:center;overflow:clip}
+.halo{position:absolute;width:min(77vw,660px);aspect-ratio:1;border-radius:50%;border:1px solid #e4c78d18;background:radial-gradient(circle,#bba3650b,transparent 67%);box-shadow:0 0 0 17px #dac18b03,0 0 0 18px #dac18b08,0 0 100px #8cbd7830;top:50%;left:50%;transform:translate(-50%,-51%);animation:halo-breathe 7s ease-in-out infinite}
+.halo::before,.halo::after{content:'';position:absolute;inset:12px;border:1px dashed #e8cc9325;border-radius:50%;animation:orbit 100s linear infinite}
+.halo::after{inset:-30px;border-style:solid;border-color:#e8cc9308;animation:none}
+.hero-botanical{position:absolute;inset:0;width:min(100%,820px);height:100%;margin:auto;overflow:visible;pointer-events:none}
+.title-composition{position:relative;text-align:center;z-index:2;transform:translateY(-12px)}
+h1{margin:0;font-weight:400;text-shadow:0 4px 35px #03160db3}
+.title-first{display:block;font-size:clamp(40px,5vw,72px);line-height:1.2;letter-spacing:-1.3px;color:#f8eed9}
+.title-script{display:block;font-family:Parisienne,cursive;font-size:clamp(76px,9vw,132px);font-weight:400;line-height:1.35;letter-spacing:-2px;margin-top:-4px;padding:0 20px;background:linear-gradient(110deg,#c49b5d 5%,#ffedc5 30%,#e7b691 52%,#fff2d0 65%,#c9a469 90%);background-size:200% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 3px 15px #d99c5220);transform:rotate(-7deg)}
+.title-star{height:35px;width:35px;fill:#ead4a1;stroke:#d7be863b;stroke-width:.6;margin-bottom:27px;overflow:visible;animation:star-breathe 4s ease-in-out infinite}
+.title-star circle{fill:none}
+.title-flourish{display:block;width:170px;height:42px;fill:none;stroke:#ddc291;stroke-width:1;margin:14px auto 0;overflow:visible}
+.flourish-heart{fill:#e2b59819;transform-origin:100px 23px;animation:heartbeat 3.3s ease-in-out infinite}
+.scroll-cue{position:absolute;bottom:22px;left:calc(50% - 12px);display:flex;align-items:center;flex-direction:column;gap:6px;color:#e7cfa0}
+.scroll-cue span{height:40px;width:1px;background:linear-gradient(transparent,#d8c294);transform-origin:top;animation:scroll-line 2.6s ease-in-out infinite}
+.scroll-cue svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;animation:scroll-arrow 2.6s ease-in-out infinite}
+.hero-stem{stroke-dasharray:1;stroke-dashoffset:0}
+.introduction.is-offscreen *{animation-play-state:paused!important}
+.growth{transform-box:fill-box;transform-origin:center bottom}
+.sway{transform-box:fill-box;transform-origin:center bottom;animation:botanical-sway var(--sway-duration,7s) ease-in-out infinite alternate;animation-delay:var(--sway-delay,0s)}
+.butterfly-flight{position:absolute;left:12%;top:28%;width:52px;height:48px;pointer-events:none;filter:drop-shadow(0 0 10px #ffb9aa40);animation:butterfly-flight 23s ease-in-out infinite;z-index:3}
+.butterfly{width:100%;height:100%;overflow:visible}
+.wing{fill:#e4b9a1;stroke:#ffdfb2;stroke-width:.7;transform-origin:50px 40px;animation:wingbeat .65s ease-in-out infinite alternate}
+.wing-right{animation-delay:-.15s}
+.butterfly-body{fill:none;stroke:#ead5a4;stroke-width:1.2}
+.note-garden{position:relative;max-width:1060px;margin:0 auto;padding:0 35px;isolation:isolate}
 .vine-art{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:-1;pointer-events:none}
-.notes{display:flex;flex-direction:column;gap:124px;padding:48px 0 120px}
-.note{position:relative;width:calc(50% - 56px);max-width:400px;min-height:236px;display:flex;flex-direction:column;justify-content:center;padding:40px 38px 36px;background:linear-gradient(120deg,#fffdf6f5,#fcfaf0fa);box-shadow:0 8px 28px #59634a07,0 1px 2px #59634a08;border:1px solid #a9ac8b82;transform:rotate(var(--tilt));overflow-wrap:anywhere}
-.note::before{content:'';position:absolute;inset:7px;border:1px solid #c8c7a65c;pointer-events:none}
-.note::after{content:'';position:absolute;width:26px;height:26px;top:-1px;left:-1px;border-top:2px solid #a8ac87;border-left:2px solid #a8ac87}
-.note:nth-child(odd){align-self:flex-end;--tilt:1.4deg}
-.note:nth-child(even){align-self:flex-start;--tilt:-1.5deg}
-.note-number{position:absolute;top:17px;left:25px;color:#aaa888;font-family:Cormorant,Georgia,serif;font-size:13px;letter-spacing:2px}
-.note h2{font-family:Parisienne,cursive;font-size:33px;font-weight:400;color:#966577;line-height:1.2;margin:10px 0 16px}
-.note p{font-family:Cormorant,Georgia,serif;font-size:25px;line-height:1.45;margin:0;white-space:pre-line}
-.note p+p{margin-top:14px}
-.note .placeholder{font-family:Parisienne,cursive;font-size:25px;color:#8d9479;text-align:center;margin-top:15px}
-.stationery-lines{height:90px;width:100%;margin-top:22px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 28px,#b3b89b38 28px,#b3b89b38 29px,transparent 29px,transparent 30px)}
-.note-seal{position:absolute;right:20px;bottom:14px;width:21px;height:27px;stroke:#a8ae8d;fill:none;stroke-width:.8;transform:rotate(20deg)}
-.vine-stroke{fill:none;stroke-linecap:round;stroke-linejoin:round}
-.vine-progress{stroke-dasharray:var(--vine-length);stroke-dashoffset:calc(var(--vine-length) * (1 - var(--progress,0)))}
-.garden-ending{display:block;width:66px;height:92px;margin:0 auto;stroke:#a3ae85;fill:none;stroke-width:1;stroke-linecap:round}
-.garden-ending path+path{fill:#d5dec5;stroke:#a7b58e}
-.garden-ready .note{opacity:0;translate:0 18px;transition:opacity 1s ease,translate 1.15s cubic-bezier(.2,.6,.2,1)}
-.garden-ready .note.is-visible{opacity:1;translate:0 0}
-.vine-detail{opacity:0;transition:opacity 1s ease}
-.vine-detail.is-visible{opacity:1}
+.notes{display:flex;flex-direction:column;gap:170px;padding:120px 0 160px}
+.note{position:relative;isolation:isolate;width:calc(50% - 66px);max-width:420px;perspective:1200px;--tilt:-3deg}
+.note:nth-child(odd){align-self:flex-end;--tilt:3deg}
+.note:nth-child(even){align-self:flex-start}
+.note-aura{position:absolute;inset:-100px -80px;z-index:-2;pointer-events:none;background:radial-gradient(ellipse,#a8c87a19,transparent 65%);transition:opacity 1s}
+.note-shell{position:relative;transform:rotate(var(--tilt));transition:transform .8s var(--ease);transform-style:preserve-3d}
+.note-back{position:absolute;inset:6px -5px -6px 5px;background:#c5b995;border:1px solid #e8cc9180;transform:rotate(-3deg);box-shadow:0 25px 65px #020d0b60}
+.note-paper{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:285px;padding:62px 40px 50px;text-align:center;color:#294a3b;background:radial-gradient(ellipse at 0 0,#fffaf0,transparent 60%),linear-gradient(130deg,#f8edd6,#eee0be);border:1px solid #ddca9f;box-shadow:inset 0 0 32px #b19d6d19,0 12px 55px #0616124d;overflow:hidden;transform-origin:center top}
+.note-paper::before{content:'';position:absolute;inset:11px;border:1px solid #b7a3727a;pointer-events:none}
+.note-paper::after{content:'';position:absolute;inset:16px;border:1px solid #b7a37225;pointer-events:none}
+.paper-light{position:absolute;inset:-100%;background:linear-gradient(110deg,transparent 40%,#fff9eaa8 50%,transparent 60%);pointer-events:none;transform:translateX(-65%) rotate(-8deg);z-index:3;opacity:0}
+.note-number{position:absolute;top:26px;left:28px;font-size:12px;letter-spacing:3px;color:#96805c}
+.note-corner{position:absolute;width:48px;height:48px;fill:none;stroke:#ac925e;stroke-width:.7;opacity:.8}
+.note-corner.corner-top{left:9px;top:9px}
+.note-corner.corner-bottom{right:9px;bottom:9px;rotate:180deg}
+.note h2{position:relative;font-family:Parisienne,cursive;font-size:36px;font-weight:400;line-height:1.2;color:#996450;margin:3px 0 15px;z-index:1}
+.note p{position:relative;font-size:29px;line-height:1.38;letter-spacing:-.25px;margin:6px 0;white-space:pre-line;overflow-wrap:anywhere;z-index:1}
+.note .placeholder{font-family:Parisienne,cursive;color:#7e8e69;font-size:30px}
+.note-decoration{position:absolute;right:-10px;bottom:-18px;width:130px;height:145px;opacity:.14;pointer-events:none;rotate:-25deg}
+.note-seal{position:absolute;top:-25px;left:calc(50% - 25px);width:50px;height:50px;z-index:4;filter:drop-shadow(0 4px 5px #25312050);transform:rotate(-10deg)}
+.note-seal svg{width:100%;height:100%;overflow:visible}
+.note-foot{width:38px;height:18px;fill:none;stroke:#9b8559;stroke-width:.7;margin-top:24px;position:relative;z-index:1}
+.card-botanical{position:absolute;width:150px;height:190px;right:-55px;top:-94px;z-index:5;pointer-events:none;filter:drop-shadow(0 9px 8px #081b1760)}
+.note:nth-child(even) .card-botanical{right:auto;left:-62px;transform:scaleX(-1)}
+.vine-line{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.vine-progress{stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--progress,0))}
+.vine-detail .growth{opacity:0;transform:scale(.05) rotate(-18deg);transition:opacity .8s,transform 1.7s var(--ease)}
+.vine-detail.is-visible .growth{opacity:1;transform:scale(1) rotate(0deg)}
+.vine-tip{fill:#ffe9af;filter:drop-shadow(0 0 6px #ffdb8e)}
+.garden-ending{position:relative;height:300px;width:400px;max-width:90%;margin:-100px auto 40px;text-align:center}
+.garden-ending svg{height:100%;width:100%;overflow:visible}
+.ending-spark{position:absolute;top:47%;left:50%;width:5px;height:5px;background:#ffeac1;border-radius:50%;box-shadow:0 0 25px 5px #e4be7040;animation:star-breathe 3s infinite}
+#petal-bursts{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.burst-petal{position:absolute;width:10px;height:15px;background:linear-gradient(135deg,#ffe5c3,#d98f93);border-radius:90% 10% 75% 25%;box-shadow:0 0 6px #d8b28533;animation:petal-burst 1.8s var(--ease) forwards}
+/* Automatic entrance followed by scroll-triggered paper reveals. */
+.garden-ready .hero-stem{animation:stem-draw 3.3s var(--ease) both;animation-delay:var(--delay,0s)}
+.garden-ready .hero-growth{animation:hero-bloom 2.2s var(--ease) both;animation-delay:var(--delay,.5s)}
+.garden-ready .hero-growth .petal-tier{transform-box:fill-box;transform-origin:center;animation:petal-open 1.8s var(--ease) both;animation-delay:calc(var(--delay,.5s) + var(--tier,0) * .14s)}
+.garden-ready .title-first{animation:title-rise 1.8s var(--ease) .55s both}
+.garden-ready .title-script{animation:script-reveal 2.1s var(--ease) 1s both,gold-shimmer 8s linear 3.1s infinite}
+.garden-ready .title-star{animation:title-rise 1.6s var(--ease) .2s both,star-breathe 4s 1.8s infinite}
+.garden-ready .flourish-line{animation:stem-draw 2.3s var(--ease) 1.6s both;stroke-dasharray:1}
+.garden-ready .flourish-heart{animation:title-rise 1s var(--ease) 2.1s both,heartbeat 3.3s 3.1s infinite}
+.garden-ready .scroll-cue{animation:title-rise 1.5s var(--ease) 2.5s both}
+.garden-ready .note-shell{opacity:0;transform:translateY(75px) rotateX(17deg) rotate(calc(var(--tilt) * 2));transition:opacity 1s,transform 1.7s var(--ease)}
+.garden-ready .note.is-visible .note-shell{opacity:1;transform:translateY(0) rotateX(0) rotate(var(--tilt))}
+.garden-ready .note-paper{clip-path:inset(0 0 100% 0);transition:clip-path 1.6s var(--ease) .12s}
+.garden-ready .note.is-visible .note-paper{clip-path:inset(0)}
+.garden-ready .note p,.garden-ready .note h2{opacity:0;translate:0 18px;transition:opacity 1s .55s,translate 1.2s var(--ease) .45s}
+.garden-ready .note.is-visible p,.garden-ready .note.is-visible h2{opacity:1;translate:0 0}
+.garden-ready .note .card-botanical{opacity:0;scale:.5;transform-origin:50% 100%;transition:opacity 1s .3s,scale 1.6s var(--ease) .3s}
+.garden-ready .note.is-visible .card-botanical{opacity:1;scale:1}
+.note.is-visible .paper-light{animation:paper-shine 2s .6s ease-in-out both}
+.garden-ready .garden-ending{opacity:0;translate:0 35px;transition:opacity 2s,translate 2s var(--ease)}
+.garden-ready .garden-ending.is-visible{opacity:1;translate:0 0}
+@media(hover:hover) and (pointer:fine){.note.is-visible:hover .note-shell{transform:translateY(-10px) rotate(0deg) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}.note:hover .note-aura{opacity:1}}
+@keyframes stem-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes hero-bloom{from{opacity:0;transform:scale(.05) rotate(-22deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes petal-open{from{opacity:.1;transform:scale(.12) rotate(-32deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes title-rise{from{opacity:0;translate:0 22px;filter:blur(7px)}to{opacity:1;translate:0 0;filter:blur(0)}}
+@keyframes script-reveal{from{opacity:0;clip-path:inset(0 100% 0 0);translate:-15px 5px}to{opacity:1;clip-path:inset(0 -8% 0 -8%);translate:0 0}}
+@keyframes gold-shimmer{to{background-position:-200% 0}}
+@keyframes botanical-sway{from{rotate:-1.7deg}to{rotate:2deg}}
+@keyframes aurora-drift{to{transform:translate(12%,-8%) scale(1.2)}}
+@keyframes halo-breathe{50%{opacity:.55;scale:.97}}
+@keyframes orbit{to{rotate:360deg}}
+@keyframes star-breathe{50%{opacity:.4;scale:.8}}
+@keyframes heartbeat{0%,25%,45%,100%{scale:1}15%,35%{scale:1.13}}
+@keyframes scroll-line{0%,100%{scale:1 .5;opacity:.25}50%{scale:1 1;opacity:.9}}
+@keyframes scroll-arrow{0%,100%{translate:0 -3px;opacity:.3}50%{translate:0 4px;opacity:.9}}
+@keyframes wingbeat{from{transform:scaleX(1)}to{transform:scaleX(.18)}}
+@keyframes butterfly-flight{0%,100%{transform:translate(0,0) rotate(-18deg)}25%{transform:translate(70px,-50px) rotate(15deg)}50%{transform:translate(130px,40px) rotate(30deg)}75%{transform:translate(20px,80px) rotate(-25deg)}}
+@keyframes paper-shine{0%{opacity:0;transform:translateX(-65%) rotate(-8deg)}20%{opacity:.55}100%{opacity:0;transform:translateX(65%) rotate(-8deg)}}
+@keyframes petal-burst{0%{opacity:0;transform:translate(0,0) rotate(0) scale(.2)}12%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--spin)) scale(.7)}}
+@media(min-width:1000px){.introduction{min-height:800px}.hero-botanical{width:790px}.title-composition{transform:translateY(-4px)}}
 @media(max-width:700px){
-  .garden{padding-left:max(23px,env(safe-area-inset-left));padding-right:max(23px,env(safe-area-inset-right));padding-bottom:32px}
-  .introduction{height:340px;padding-top:20px}
-  .title-first{font-size:44px;letter-spacing:-1px}
-  .title-script{font-size:72px;margin-top:1px}
-  .title-botanical{width:440px;max-width:calc(100% + 36px);left:-18px;right:-18px}
-  .title-flourish{margin-top:13px;width:92px}
-  .notes{padding-top:36px;padding-bottom:92px;gap:136px}
-  .note{width:calc(100% - 38px);max-width:380px;min-height:215px;padding:40px 27px 32px}
-  .note:nth-child(odd){--tilt:1deg}
-  .note:nth-child(even){--tilt:-1deg}
-  .note h2{font-size:31px}
-  .note p{font-size:23px;line-height:1.4}
-  .note-number{left:23px;top:15px;font-size:12px}
-  .stationery-lines{height:88px;margin-top:20px}
+ .introduction{min-height:650px;max-height:950px}
+ .hero-botanical{width:620px;max-width:none;left:50%;right:auto;transform:translateX(-50%)}
+ .halo{width:91vw;top:46%;box-shadow:0 0 0 17px #dac18b03,0 0 0 18px #dac18b08,0 0 100px #8cbd7825}
+ .title-composition{transform:translateY(-22px)}
+ .title-first{font-size:clamp(38px,10.5vw,58px);letter-spacing:-.8px}
+ .title-script{font-size:clamp(72px,20vw,108px);letter-spacing:-2px;padding:0 11px;line-height:1.4}
+ .title-star{width:28px;height:28px;margin-bottom:24px}
+ .title-flourish{width:144px;margin-top:11px}
+ .butterfly-flight{left:8%;top:20%;width:35px;height:30px}
+ .scroll-cue{bottom:22px}
+ .note-garden{padding:0 28px}
+ .notes{gap:185px;padding:100px 0 190px}
+ .note{width:calc(100% - 26px);max-width:440px;--tilt:-2deg}
+ .note:nth-child(odd){--tilt:2deg}
+ .note-paper{min-height:275px;padding:62px 28px 44px}
+ .note p{font-size:27px;line-height:1.4}
+ .note h2{font-size:33px}
+ .note-number{top:25px;left:26px}
+ .card-botanical{right:-34px;top:-83px;width:125px;height:160px}
+ .note:nth-child(even) .card-botanical{left:-36px}
+ .note-seal{width:46px;height:46px;left:calc(50% - 23px);top:-23px}
+ .garden-ending{margin-top:-135px;margin-bottom:25px;height:270px}
+ .aurora{filter:blur(30px)}
 }
-@media(max-width:360px){.garden{padding-left:17px;padding-right:17px}.title-first{font-size:39px}.title-script{font-size:65px}.title-botanical{max-width:calc(100% + 32px);left:-16px;right:-16px}.note{width:calc(100% - 30px);padding:35px 24px 30px}.note p{font-size:21px}.introduction{height:310px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.garden-ready .note{opacity:1;translate:none;transition:none}.vine-detail{opacity:1;transition:none}.vine-progress{stroke-dashoffset:0}}
+@media(max-width:360px){.note-garden{padding:0 22px}.note{width:calc(100% - 18px)}.note-paper{padding:60px 24px 38px}.note p{font-size:25px}.introduction{min-height:610px}.hero-botanical{width:570px}.card-botanical{width:112px}.title-script{font-size:69px}}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{animation:none!important;transition:none!important}
+ #fireflies,.butterfly-flight,#petal-bursts{display:none}
+ .garden-ready .note-shell{opacity:1;transform:rotate(var(--tilt))}
+ .garden-ready .note-paper{clip-path:none}
+ .garden-ready .note p,.garden-ready .note h2,.garden-ready .note .card-botanical,.garden-ready .garden-ending{opacity:1;translate:none;scale:1}
+ .vine-detail .growth{opacity:1;transform:none}
+ .vine-progress{stroke-dashoffset:0}
+}
