@@ -23,7 +23,7 @@
   const glowCache = new Map();
   let width = 0, height = 0, ratio = 1, portrait = true;
   let stars = [], rockets = [], blooms = [], stillFlowers = [], meteors = [];
-  let time = 0, nextLaunch = .12, nextMeteor = 8, sequence = 0;
+  let time = 0, nextMeteor = 8, sequence = 0;
   let frame = 0, lastTime = 0, resizeTimer, lastTouch = -10;
 
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
@@ -259,7 +259,7 @@
     const point = (portrait ? portraitPoints : landscapePoints)[index % 6];
     return { x: width * point[0], y: height * point[1] };
   }
-  function launch(x, y, manual = false) {
+  function launch(x, y) {
     if (rockets.length >= 3 || blooms.length + rockets.length >= 7) return;
     const index = sequence++;
     const radius = radiusFor(index);
@@ -271,7 +271,7 @@
       y: clamp(y, radius * 1.15 + 8, height * .84)
     };
     rockets.push({
-      born: time, duration: manual ? .9 : 1.1 + (index % 3) * .12,
+      born: time, duration: .9,
       startX: clamp(target.x + random(-width * .18, width * .18), width * .1, width * .9),
       startY: height + 20, target, radius, kind, paletteIndex, turn: random(-.35, .35)
     });
@@ -474,11 +474,6 @@
     if (document.hidden || reduced.matches) return;
     const step = lastTime ? Math.min((now - lastTime) / 1000, .05) : .016;
     lastTime = now; time += step;
-    if (time >= nextLaunch) {
-      const point = locationFor(sequence);
-      launch(point.x, point.y);
-      nextLaunch = time + (portrait ? 2.05 : 1.75) + (sequence % 4 === 0 ? .7 : 0);
-    }
     const landed = rockets.filter(rocket => time - rocket.born >= rocket.duration);
     rockets = rockets.filter(rocket => time - rocket.born < rocket.duration);
     landed.forEach(burst);
@@ -520,8 +515,7 @@
     }
     drawSky();
     rockets = []; blooms = []; meteors = [];
-    nextLaunch = time + .15;
-    stillFlowers = Array.from({ length: 3 }, (_, index) => createStillFlower(index, locationFor(index)));
+    stillFlowers = [];
     if (reduced.matches) renderStill();
     else render();
   }
@@ -531,7 +525,6 @@
       rockets = []; blooms = [];
       renderStill();
     } else if (!document.hidden) {
-      nextLaunch = time + .15;
       frame = requestAnimationFrame(tick);
     }
   }
@@ -544,7 +537,7 @@
       stillFlowers.push(createStillFlower(sequence++, { x, y }));
       if (stillFlowers.length > 4) stillFlowers.shift();
       renderStill();
-    } else launch(x, y, true);
+    } else launch(x, y);
   });
   canvas.addEventListener('keydown', event => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -556,7 +549,7 @@
       if (stillFlowers.length > 4) stillFlowers.shift();
       renderStill();
     } else if (time - lastTouch >= .25) {
-      lastTouch = time; launch(point.x, point.y, true);
+      lastTouch = time; launch(point.x, point.y);
     }
   });
   addEventListener('resize', () => {
