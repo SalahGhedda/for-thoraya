@@ -10,6 +10,7 @@
   const TAU = Math.PI * 2;
   const ART_RADIUS = 100;
   const ART_SIZE = 280;
+  const MAX_FLOWERS = 10;
   const palettes = [
     { color: [255, 137, 192], light: [255, 225, 235], dark: [151, 46, 104] },
     { color: [236, 153, 255], light: [253, 224, 255], dark: [112, 57, 147] },
@@ -260,7 +261,7 @@
     return { x: width * point[0], y: height * point[1] };
   }
   function launch(x, y) {
-    if (rockets.length >= 3 || blooms.length + rockets.length >= 7) return;
+    if (rockets.length >= 3 || blooms.length + rockets.length >= MAX_FLOWERS + 1) return;
     const index = sequence++;
     const radius = radiusFor(index);
     const kind = varieties[index % varieties.length];
@@ -292,7 +293,7 @@
         angle: i / 13 * TAU + random(-.15, .15), offset: random(0, .8), speed: random(15, 30), rotation: random(0, TAU)
       }))
     });
-    if (blooms.length > 6) blooms.shift();
+    if (blooms.length > MAX_FLOWERS) blooms.shift();
   }
   function rocketPosition(rocket, p) {
     const progress = ease(p);
@@ -535,7 +536,7 @@
     const x = event.clientX - rect.left, y = event.clientY - rect.top;
     if (reduced.matches) {
       stillFlowers.push(createStillFlower(sequence++, { x, y }));
-      if (stillFlowers.length > 4) stillFlowers.shift();
+      if (stillFlowers.length > MAX_FLOWERS) stillFlowers.shift();
       renderStill();
     } else launch(x, y);
   });
@@ -546,7 +547,7 @@
     const point = locationFor(sequence);
     if (reduced.matches) {
       stillFlowers.push(createStillFlower(sequence++, point));
-      if (stillFlowers.length > 4) stillFlowers.shift();
+      if (stillFlowers.length > MAX_FLOWERS) stillFlowers.shift();
       renderStill();
     } else if (time - lastTouch >= .25) {
       lastTouch = time; launch(point.x, point.y);
