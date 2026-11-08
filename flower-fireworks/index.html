@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#060915">
+  <meta name="description" content="A night sky where fireworks bloom into flowers.">
+  <title>A sky in bloom · For Thoraya</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./sky.css?v=1">
+  <script src="./sky.js?v=1" defer></script>
+</head>
+<body>
+  <main class="night" aria-label="A sky of flower fireworks">
+    <h1 class="sr-only">A sky in bloom, for Thoraya</h1>
+    <p id="sky-instructions" class="sr-only">Flowers bloom from fireworks in a starry night sky. Tap or click the sky, or press Enter or Space, to launch a flower. With reduced motion enabled, a still floral sky is shown.</p>
+    <canvas id="stars" aria-hidden="true"></canvas>
+    <canvas id="fireworks" tabindex="0" role="img" aria-label="An interactive night sky of fireworks blooming into pink flowers" aria-describedby="sky-instructions"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <noscript><p class="fallback">Enable JavaScript to let the sky bloom.</p></noscript>
+  </main>
+</body>
+</html>
