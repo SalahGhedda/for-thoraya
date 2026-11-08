@@ -12,13 +12,40 @@
   const ART_SIZE = 280;
   const MAX_FLOWERS = 10;
   const palettes = [
-    { color: [255, 137, 192], light: [255, 225, 235], dark: [151, 46, 104] },
-    { color: [236, 153, 255], light: [253, 224, 255], dark: [112, 57, 147] },
-    { color: [255, 182, 194], light: [255, 238, 220], dark: [168, 76, 104] },
-    { color: [255, 206, 153], light: [255, 245, 215], dark: [167, 103, 81] },
-    { color: [255, 110, 171], light: [255, 206, 224], dark: [145, 35, 94] }
+    { name: 'Rose pink', color: [255, 137, 192], light: [255, 225, 235], dark: [151, 46, 104] },
+    { name: 'Lavender', color: [207, 137, 255], light: [248, 220, 255], dark: [99, 43, 157], accent: [148, 171, 255] },
+    { name: 'Blush', color: [255, 182, 194], light: [255, 238, 220], dark: [168, 76, 104] },
+    { name: 'Peach', color: [255, 190, 123], light: [255, 242, 210], dark: [173, 88, 51], accent: [255, 128, 156] },
+    { name: 'Fuchsia', color: [255, 75, 173], light: [255, 200, 232], dark: [143, 25, 109], accent: [255, 147, 109] },
+    { name: 'Sapphire', color: [73, 148, 255], light: [200, 229, 255], dark: [33, 57, 151], accent: [161, 128, 255] },
+    { name: 'Aqua', color: [68, 222, 245], light: [213, 255, 252], dark: [25, 112, 153], accent: [100, 151, 255] },
+    { name: 'Mint', color: [115, 232, 168], light: [223, 255, 211], dark: [32, 120, 100], accent: [90, 213, 222] },
+    { name: 'Sunshine', color: [255, 211, 68], light: [255, 249, 187], dark: [177, 103, 29], accent: [255, 155, 58] },
+    { name: 'Tangerine', color: [255, 144, 65], light: [255, 228, 173], dark: [172, 65, 39], accent: [255, 90, 124] },
+    { name: 'Coral', color: [255, 112, 130], light: [255, 220, 196], dark: [164, 44, 82], accent: [255, 179, 92] },
+    { name: 'Ruby', color: [244, 65, 109], light: [255, 178, 184], dark: [121, 20, 65], accent: [255, 107, 175] },
+    { name: 'Indigo', color: [133, 112, 255], light: [224, 214, 255], dark: [64, 34, 139], accent: [90, 174, 255] },
+    { name: 'Pearl', color: [237, 240, 255], light: [255, 254, 241], dark: [117, 135, 175], accent: [255, 192, 219] },
+    { name: 'Violet', color: [185, 78, 240], light: [245, 198, 255], dark: [100, 31, 135], accent: [252, 107, 182] },
+    { name: 'Periwinkle', color: [153, 184, 255], light: [224, 238, 255], dark: [73, 78, 156], accent: [224, 145, 241] }
   ];
-  const varieties = ['rose', 'daisy', 'lily', 'blossom'];
+  const flowerStyles = {
+    rose: { layers: [[9, 1, 0], [8, .72, .25], [6, .43, -.25]], center: 'rose' },
+    daisy: { layers: [[15, 1, 0], [13, .78, .16]], center: 'gold', core: .18 },
+    lily: { layers: [[6, .92, 0], [6, .67, .52]], center: 'stamens', core: .09 },
+    blossom: { layers: [[5, 1, 0]], center: 'stamens', core: .1 },
+    dahlia: { layers: [[16, 1, 0], [14, .79, .2], [11, .58, 0], [8, .36, .3]], center: 'gold', core: .08 },
+    sunflower: { layers: [[17, 1, 0], [15, .87, .18]], center: 'sunflower', core: .32 },
+    poppy: { layers: [[4, 1, .2], [4, .77, 1]], center: 'poppy', core: .19 },
+    orchid: { layers: [[3, 1, 0], [2, .86, Math.PI / 2]], center: 'orchid' },
+    lotus: { layers: [[8, 1, 0], [8, .74, .39], [7, .48, 0]], center: 'lotus', core: .13 },
+    chrysanthemum: { layers: [[26, 1, 0], [22, .81, .15], [18, .61, 0], [12, .4, .2]], center: 'gold', core: .08 },
+    cornflower: { layers: [[8, 1, 0], [8, .62, .39]], center: 'cornflower', core: .16 },
+    hibiscus: { layers: [[5, 1, .15]], center: 'hibiscus', core: .14 }
+  };
+  const varieties = Object.keys(flowerStyles);
+  const flowerBag = [], colorBag = [];
+  let lastKind = 'rose', lastPalette = 0;
   const gold = [255, 222, 164];
   const artCache = new Map();
   const glowCache = new Map();
@@ -36,6 +63,30 @@
   };
   const rgba = (color, alpha = 1) => 'rgba(' + color.join(',') + ',' + clamp(alpha) + ')';
   const random = (min, max) => min + Math.random() * (max - min);
+  function drawFromBag(bag, options, previous) {
+    if (!bag.length) {
+      bag.push(...options);
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+    }
+    if (bag[bag.length - 1] === previous) {
+      const alternate = bag.findIndex(value => value !== previous);
+      if (alternate >= 0) [bag[alternate], bag[bag.length - 1]] = [bag[bag.length - 1], bag[alternate]];
+    }
+    return bag.pop();
+  }
+  function appearanceFor(index) {
+    // Start with a pink rose, then explore every silhouette and color independently.
+    const kinds = index < varieties.length ? varieties.filter(kind => kind !== 'rose') : varieties;
+    const colors = palettes.map((_, i) => i).filter(i => index >= palettes.length || i !== 0);
+    if (index) {
+      lastKind = drawFromBag(flowerBag, kinds, lastKind);
+      lastPalette = drawFromBag(colorBag, colors, lastPalette);
+    }
+    return { kind: lastKind, paletteIndex: lastPalette };
+  }
   function seeded(seed) {
     return () => {
       seed = (seed * 1664525 + 1013904223) >>> 0;
@@ -93,6 +144,64 @@
       ['C', -.02, -1.15, .16, -1.04, .16, -.84],
       ['C', .18, -.48, .1, -.05, .02, .13],
       ['C', .01, .14, -.01, .14, -.02, .13]
+    ],
+    dahlia: [
+      ['M', 0, .06],
+      ['C', -.25, -.23, -.31, -.72, 0, -1.08],
+      ['C', .31, -.72, .25, -.23, 0, .06]
+    ],
+    sunflower: [
+      ['M', -.04, -.13],
+      ['C', -.19, -.39, -.26, -.83, -.04, -1.1],
+      ['C', .06, -.96, .25, -.88, .21, -.63],
+      ['C', .2, -.36, .09, -.2, -.04, -.13]
+    ],
+    poppy: [
+      ['M', 0, .08],
+      ['C', -.4, -.04, -.88, -.33, -.79, -.7],
+      ['C', -.92, -.97, -.55, -1.13, -.36, -.96],
+      ['C', -.2, -1.17, .04, -1.15, .2, -1],
+      ['C', .44, -1.17, .77, -.99, .73, -.75],
+      ['C', .94, -.48, .49, -.07, 0, .08]
+    ],
+    orchid: [
+      ['M', 0, .08],
+      ['C', -.28, -.14, -.65, -.54, -.46, -.85],
+      ['C', -.3, -1.13, .23, -1.22, .46, -.93],
+      ['C', .75, -.59, .35, -.11, 0, .08]
+    ],
+    lotus: [
+      ['M', 0, .08],
+      ['C', -.47, -.21, -.43, -.65, 0, -1.15],
+      ['C', .43, -.65, .47, -.21, 0, .08]
+    ],
+    chrysanthemum: [
+      ['M', -.02, .05],
+      ['C', -.1, -.25, -.17, -.76, .03, -1.02],
+      ['C', .1, -1.17, .28, -1.13, .24, -.96],
+      ['C', .13, -.93, .01, -.85, .04, -.59],
+      ['C', .09, -.26, .09, -.04, -.02, .05]
+    ],
+    cornflower: [
+      ['M', 0, .04],
+      ['C', -.19, -.23, -.27, -.51, -.36, -.83],
+      ['C', -.37, -.87, -.45, -.98, -.39, -1.06],
+      ['C', -.29, -.99, -.24, -.85, -.2, -.87],
+      ['C', -.16, -.95, -.21, -1.12, -.14, -1.13],
+      ['C', -.08, -1.07, -.03, -.94, 0, -.91],
+      ['C', .06, -1.02, .08, -1.16, .13, -1.14],
+      ['C', .2, -1.1, .19, -.95, .24, -.87],
+      ['C', .3, -.94, .38, -1.01, .42, -.96],
+      ['C', .32, -.6, .24, -.21, 0, .04]
+    ],
+    hibiscus: [
+      ['M', 0, .08],
+      ['C', -.47, -.1, -.64, -.51, -.62, -.77],
+      ['C', -.76, -.96, -.53, -1.08, -.38, -.96],
+      ['C', -.31, -1.12, -.09, -1.14, .03, -1.02],
+      ['C', .19, -1.15, .42, -1.05, .43, -.91],
+      ['C', .69, -.92, .75, -.65, .59, -.48],
+      ['C', .52, -.23, .23, .02, 0, .08]
     ]
   };
   function petalPath(commands) {
@@ -121,14 +230,102 @@
     }
     return points;
   }
+  function makeCenter(style, palette) {
+    const plate = document.createElement('canvas');
+    plate.width = plate.height = ART_SIZE * 1.5;
+    const paint = plate.getContext('2d');
+    paint.scale(1.5, 1.5);
+    paint.translate(ART_SIZE / 2, ART_SIZE / 2);
+    const core = (style.core || .12) * ART_RADIUS;
+    const dot = (x, y, radius, color) => {
+      paint.fillStyle = color;
+      paint.beginPath(); paint.arc(x, y, radius, 0, TAU); paint.fill();
+    };
+    if (style.center === 'orchid') {
+      // The hanging, striped lip makes this a five-petalled orchid, not a rosette.
+      const lip = paint.createLinearGradient(0, -8, 0, 51);
+      lip.addColorStop(0, '#fff2bd'); lip.addColorStop(.35, rgba(palette.light)); lip.addColorStop(1, rgba(palette.color));
+      paint.fillStyle = lip;
+      paint.strokeStyle = rgba(palette.light, .9); paint.lineWidth = 1;
+      paint.beginPath(); paint.moveTo(-7, -7);
+      paint.bezierCurveTo(-18, 4, -12, 14, -29, 23);
+      paint.bezierCurveTo(-38, 39, -18, 51, 0, 40);
+      paint.bezierCurveTo(18, 51, 38, 39, 29, 23);
+      paint.bezierCurveTo(12, 14, 18, 4, 7, -7);
+      paint.closePath(); paint.fill(); paint.stroke();
+      paint.strokeStyle = rgba(palette.dark, .75); paint.lineWidth = 1.3;
+      for (let i = -3; i <= 3; i++) {
+        paint.beginPath(); paint.moveTo(i * 1.2, 8);
+        paint.quadraticCurveTo(i * 4, 20, i * 6, 32 + Math.abs(i)); paint.stroke();
+      }
+      dot(0, 1, 6, '#ffe9a9'); dot(0, -5, 3, '#fff8de');
+      return plate;
+    }
+    if (style.center === 'rose') {
+      for (let i = 0; i < 6; i++) {
+        paint.save(); paint.rotate(i * 2.399);
+        paint.strokeStyle = rgba(i % 2 ? palette.light : palette.color, .85);
+        paint.lineWidth = 1.2;
+        paint.beginPath(); paint.ellipse(0, -i * 1.1, 3 + i * 1.4, 2 + i * .9, 0, -.4, Math.PI * 1.3); paint.stroke();
+        paint.restore();
+      }
+      dot(0, 0, 2, rgba(palette.light));
+      return plate;
+    }
+    const darkCore = ['sunflower', 'poppy', 'cornflower', 'hibiscus'].includes(style.center);
+    if (darkCore) {
+      dot(0, 0, core, style.center === 'sunflower' ? '#392130' : rgba(palette.dark, .96));
+      paint.strokeStyle = rgba(palette.light, .55); paint.lineWidth = .8;
+      paint.beginPath(); paint.arc(0, 0, core, 0, TAU); paint.stroke();
+    }
+    const pollen = style.center === 'sunflower' ? 120 : darkCore ? 32 : 42;
+    for (let i = 0; i < pollen; i++) {
+      const distance = Math.sqrt((i + .5) / pollen) * core;
+      const angle = i * 2.399;
+      const color = style.center === 'sunflower' ? (i % 3 ? '#b88948' : '#ffe0a0')
+        : darkCore ? (i % 3 ? rgba(palette.light, .8) : '#fff4d3') : (i % 3 ? '#f4ce87' : '#fff8d9');
+      dot(Math.cos(angle) * distance, Math.sin(angle) * distance, style.center === 'sunflower' ? 1.2 : .9, color);
+    }
+    if (['stamens', 'poppy', 'cornflower'].includes(style.center)) {
+      const count = style.center === 'stamens' ? 10 : 24;
+      for (let i = 0; i < count; i++) {
+        const angle = i / count * TAU;
+        const reach = core + (style.center === 'cornflower' ? 16 : 12) + Math.sin(i * 2.4) * 3;
+        const x = Math.cos(angle) * reach, y = Math.sin(angle) * reach;
+        paint.strokeStyle = style.center === 'poppy' ? rgba(palette.dark, .9) : rgba(palette.light, .8);
+        paint.lineWidth = .8;
+        paint.beginPath(); paint.moveTo(0, 0); paint.quadraticCurveTo(x * .6 - 3, y * .5, x, y); paint.stroke();
+        dot(x, y, style.center === 'stamens' ? 1.7 : 1.2, style.center === 'cornflower' ? rgba(palette.light) : '#ffe9b5');
+      }
+    }
+    if (style.center === 'poppy' || style.center === 'lotus') {
+      dot(0, 0, core * .55, style.center === 'poppy' ? '#b8cebd' : '#a5bf73');
+      for (let i = 0; i < 9; i++) {
+        const angle = i / 9 * TAU;
+        if (style.center === 'lotus') dot(Math.cos(angle) * core * .33, Math.sin(angle) * core * .33, 1.2, '#526f4c');
+        else {
+          paint.strokeStyle = '#49666a'; paint.lineWidth = 1;
+          paint.beginPath(); paint.moveTo(0, 0); paint.lineTo(Math.cos(angle) * core * .47, Math.sin(angle) * core * .47); paint.stroke();
+        }
+      }
+    }
+    if (style.center === 'hibiscus') {
+      paint.strokeStyle = '#ffe4b4'; paint.lineWidth = 3;
+      paint.beginPath(); paint.moveTo(0, 3); paint.bezierCurveTo(8, -12, 28, -30, 23, -58); paint.stroke();
+      for (let i = 0; i < 17; i++) {
+        const y = -18 - i * 2.1, x = 12 + Math.sin(i * .14) * 12;
+        dot(x + (i % 2 ? -4 : 4), y, 1.8, '#ffdb88');
+      }
+      for (let i = 0; i < 5; i++) dot(23 + Math.cos(i / 5 * TAU) * 5, -58 + Math.sin(i / 5 * TAU) * 5, 2.7, '#ff9fab');
+    }
+    return plate;
+  }
   function makeFlower(kind, paletteIndex) {
     const key = kind + '-' + paletteIndex;
     if (artCache.has(key)) return artCache.get(key);
     const palette = palettes[paletteIndex];
-    const layers = kind === 'rose' ? [[9, 1, 0], [8, .72, .25], [6, .43, -.25]]
-      : kind === 'daisy' ? [[15, 1, 0], [13, .78, .16]]
-      : kind === 'lily' ? [[6, .92, 0], [6, .67, .52]]
-      : [[5, 1, 0], [5, .55, .55]];
+    const style = flowerStyles[kind];
+    const layers = style.layers;
     const outlines = [];
     const plates = layers.map(([count, scale, angle], layerIndex) => {
       const plate = document.createElement('canvas');
@@ -145,8 +342,8 @@
         paint.scale(r, r);
         const gradient = paint.createLinearGradient(-.3, -1.08, .2, .22);
         gradient.addColorStop(0, rgba(palette.light, .9));
-        gradient.addColorStop(.2, rgba(palette.color, .76));
-        gradient.addColorStop(.62, rgba(palette.color, .52));
+        gradient.addColorStop(.2, rgba(palette.color, .87));
+        gradient.addColorStop(.62, rgba(palette.accent || palette.color, .7));
         gradient.addColorStop(1, rgba(palette.dark, .67));
         paint.fillStyle = gradient;
         paint.fill(petalPaths[kind]);
@@ -170,6 +367,21 @@
             paint.fill();
           }
         }
+        if (kind === 'dahlia' || kind === 'lotus') {
+          // A shaded fold gives the pointed petals their cupped form.
+          paint.beginPath(); paint.moveTo(0, -.02);
+          paint.bezierCurveTo(-.1, -.4, -.1, -.8, 0, -1.08);
+          paint.bezierCurveTo(.03, -.7, .08, -.32, 0, -.02);
+          paint.fillStyle = rgba(palette.light, .16);
+          paint.fill();
+        }
+        if (kind === 'poppy' || kind === 'hibiscus') {
+          const eye = paint.createRadialGradient(0, -.03, 0, 0, -.03, .48);
+          eye.addColorStop(0, rgba(palette.dark, .9));
+          eye.addColorStop(1, rgba(palette.dark, 0));
+          paint.fillStyle = eye;
+          paint.fill(petalPaths[kind]);
+        }
         paint.restore();
         if (layerIndex < 2) {
           samples.forEach(point => outlines.push({
@@ -181,8 +393,8 @@
       }
       return plate;
     });
-    const flower = { plates, outlines, palette, kind };
-    // Bounded to the small set of scheduled color/flower combinations.
+    const flower = { plates, outlines, palette, kind, center: makeCenter(style, palette) };
+    // Keep the larger variety from growing the phone's canvas cache indefinitely.
     if (artCache.size >= 14) artCache.delete(artCache.keys().next().value);
     artCache.set(key, flower);
     return flower;
@@ -264,9 +476,7 @@
     if (rockets.length >= 3 || blooms.length + rockets.length >= MAX_FLOWERS + 1) return;
     const index = sequence++;
     const radius = radiusFor(index);
-    const kind = varieties[index % varieties.length];
-    // Pink is the dominant color, with champagne and lilac accents.
-    const paletteIndex = [0, 2, 1, 4, 2, 3, 0, 2][index % 8];
+    const { kind, paletteIndex } = appearanceFor(index);
     const target = {
       x: clamp(x, radius * .95 + 7, width - radius * .95 - 7),
       y: clamp(y, radius * 1.15 + 8, height * .84)
@@ -348,27 +558,8 @@
       ctx.restore();
     });
     ctx.globalAlpha = fade * appear;
-    const stamenR = radius * (art.kind === 'daisy' ? .18 : .12) * ease(age / .8);
-    const pollen = art.kind === 'daisy' ? 50 : 24;
-    for (let i = 0; i < pollen; i++) {
-      const distance = Math.sqrt((i + .5) / pollen) * stamenR;
-      const angle = i * 2.399;
-      ctx.fillStyle = i % 3 ? '#f4ce87' : '#fff8d9';
-      ctx.beginPath();
-      ctx.arc(Math.cos(angle) * distance, Math.sin(angle) * distance, Math.max(.7, radius * .011), 0, TAU);
-      ctx.fill();
-    }
-    if (art.kind === 'lily' || art.kind === 'blossom') {
-      ctx.strokeStyle = rgba(gold, .6);
-      ctx.lineWidth = .65;
-      for (let i = 0; i < 8; i++) {
-        const angle = i / 8 * TAU;
-        const x = Math.cos(angle) * radius * .27, y = Math.sin(angle) * radius * .27;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(x * .7 - 4, y * .5, x, y); ctx.stroke();
-        ctx.fillStyle = '#ffe9b5';
-        ctx.beginPath(); ctx.ellipse(x, y, 1.3, 2.2, angle, 0, TAU); ctx.fill();
-      }
-    }
+    const centerSize = ART_SIZE * radius / ART_RADIUS * ease(age / .8);
+    ctx.drawImage(art.center, -centerSize / 2, -centerSize / 2, centerSize, centerSize);
     ctx.restore();
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'lighter';
@@ -383,7 +574,7 @@
       const py = center.y + rotatedY * grow + drift * drift * 12;
       const sparkle = .45 + (Math.sin(age * 7 + particle.phase) + 1) * .275;
       const alpha = fade * sparkle * (particle.layer ? .46 : .8);
-      glow(px, py, particle.size * 6, particle.layer ? gold : art.palette.color, alpha);
+      glow(px, py, particle.size * 6, particle.layer ? (art.palette.accent || gold) : art.palette.color, alpha);
       if (age < .7) {
         const previousGrow = ease(Math.max(0, age - .05) / .8);
         ctx.strokeStyle = rgba(art.palette.color, .4 * (1 - age / .7));
@@ -401,7 +592,7 @@
         const x = bloom.x + Math.cos(spark.angle) * distance;
         const y = bloom.y + Math.sin(spark.angle) * distance + age * age * 12;
         const alpha = Math.pow(1 - age / spark.life, 1.3);
-        const color = spark.gold ? gold : art.palette.color;
+        const color = spark.gold ? (art.palette.accent || gold) : art.palette.color;
         ctx.strokeStyle = rgba(color, alpha * .75);
         ctx.lineWidth = spark.size * .75;
         ctx.beginPath(); ctx.moveTo(bloom.x + Math.cos(spark.angle) * previous, bloom.y + Math.sin(spark.angle) * previous + prevAge * prevAge * 12);
@@ -491,7 +682,7 @@
     const radius = radiusFor(index);
     const rocket = {
       target: { x: clamp(position.x, radius + 8, width - radius - 8), y: clamp(position.y, radius * 1.2 + 8, height * .84) },
-      radius, kind: varieties[index % 4], paletteIndex: [0, 2, 1, 4][index % 4], turn: -.2 + index * .15
+      radius, ...appearanceFor(index), turn: random(-.35, .35)
     };
     const previous = blooms;
     blooms = [];
